@@ -1,18 +1,17 @@
-const assert = require('assert');
+var assert = require('assert');
 const {
     setServerConfiguration,
     goToUrlAndSetLocalStorage,
     getElement,
-    clickElement,
 } = require('../../../shared/specUtils_Async');
 
 const CBIOPORTAL_URL = process.env.CBIOPORTAL_URL.replace(/\/$/, '');
 
-const getBrowserHeight = async () => {
-    return Number((await browser.getWindowSize()).height);
+const getBrowserHeight = () => {
+    return Number(browser.getWindowSize().height);
 };
 
-const customTabBase = location => {
+function customTabBase(location) {
     return [
         {
             title: 'Sync Tab',
@@ -40,28 +39,16 @@ const customTabBase = location => {
     ];
 };
 
-const goToUrlWithCustomTabConfig = async (url, custom_tabs) => {
+async function goToUrlWithCustomTabConfig(url, custom_tabs) {
     await browser.url(`${CBIOPORTAL_URL}/blank`);
-    setServerConfiguration({ custom_tabs });
+    setServerConfiguration({
+        custom_tabs,
+    });
     await goToUrlAndSetLocalStorage(url);
-};
+}
 
-const waitForMainTabs = async () => {
-    await browser.waitUntil(
-        async () => {
-            return await (await getElement('.mainTabs')).isDisplayed();
-        },
-        { timeout: 50000 }
-    );
-};
-
-const runTests = async (pageName, url, tabLocation) => {
-    describe(`${pageName} Custom Tabs`, () => {
-        before(
-            async () =>
-                await browser.setWindowSize(2000, await getBrowserHeight())
-        );
-
+function runTests(pageName, url, tabLocation) {
+    describe.only(`${pageName} Custom Tabs`, () => {
         it.skip('Sync and async hide/show works', async function() {
             this.retries(0);
 
@@ -75,7 +62,7 @@ const runTests = async (pageName, url, tabLocation) => {
                 };
             });
 
-            await waitForMainTabs();
+            (await getElement('.mainTabs')).waitForDisplayed();
 
             assert.equal(
                 await (await getElement('=Async Tab')).isDisplayed(),
@@ -95,7 +82,7 @@ const runTests = async (pageName, url, tabLocation) => {
                 'Async tab displays after pause'
             );
 
-            await (await getElement('=Sync Tab')).click();
+            (await getElement('=Sync Tab')).click();
 
             assert(
                 await (
@@ -132,9 +119,9 @@ const runTests = async (pageName, url, tabLocation) => {
 
             await goToUrlWithCustomTabConfig(url, conf);
 
-            await browser.setWindowSize(2500, await getBrowserHeight());
+            await browser.setWindowSize(2000, getBrowserHeight());
 
-            await waitForMainTabs();
+            await (await getElement('.mainTabs')).waitForDisplayed();
 
             assert.equal(
                 await (await getElement('=Patient Tab')).isDisplayed(),
@@ -171,9 +158,9 @@ const runTests = async (pageName, url, tabLocation) => {
 
             await goToUrlWithCustomTabConfig(url, conf);
 
-            await browser.setWindowSize(2000, Number(await getBrowserHeight()));
+            await browser.setWindowSize(2000, Number(getBrowserHeight()));
 
-            await waitForMainTabs();
+            await (await getElement('.mainTabs')).waitForDisplayed();
 
             assert.equal(
                 await (await getElement('=Hidden Tab')).isDisplayed(),
@@ -220,18 +207,8 @@ const runTests = async (pageName, url, tabLocation) => {
                 url.replace(/\?/, '/customTab1?'),
                 conf
             );
-            await waitForMainTabs();
 
-            // TODO: why are we assert
-            assert.equal(
-                await (
-                    await getElement('[data-test=LoadingIndicator]', {
-                        timeout: 5000,
-                    })
-                ).isDisplayed(),
-                true,
-                'tab loading indicator is showing'
-            );
+            await (await getElement('.mainTabs')).waitForDisplayed();
 
             // TODO: this is not a quality test
             // when we are directly routed to tab
@@ -239,13 +216,17 @@ const runTests = async (pageName, url, tabLocation) => {
             // even though hideAsync is still pending
 
             assert.equal(
-                await (
-                    await getElement('=Async Tab', {
-                        timeout: 5000,
-                    })
-                ).isDisplayed(),
+                await (await getElement('=Async Tab')).isDisplayed(),
                 true,
                 'We see pending custom tab button when routed to it'
+            );
+
+            assert.equal(
+                await (
+                    await getElement('[data-test=LoadingIndicator]')
+                ).isDisplayed(),
+                true,
+                'tab loading indicator is showing'
             );
 
             assert.equal(
@@ -274,18 +255,18 @@ const runTests = async (pageName, url, tabLocation) => {
 
             await goToUrlWithCustomTabConfig(url, conf);
 
-            await waitForMainTabs();
-
-            await browser.setWindowSize(2000, await getBrowserHeight());
+            await browser.setWindowSize(1600, getBrowserHeight());
 
             await browser.execute(() => {
-                window.renderCustomTab1 = div => {
-                    $(div).append(`<div>First render</div>`);
+                window.renderCustomTab1 = async function(div) {
+                    await (await getElement(div)).append(
+                        `<div>First render</div>`
+                    );
                 };
             });
 
             // offset to avoid overlapping elements
-            await clickElement('=Async Tab');
+            await (await getElement('=Async Tab')).click();
 
             await browser.pause(1000);
 
@@ -294,27 +275,25 @@ const runTests = async (pageName, url, tabLocation) => {
             // redefine custom tab render
             // so we can see when it's called
             await browser.execute(() => {
-                window.renderCustomTab1 = function(div, _tab) {
-                    $(div).append(`<div>Second render</div>`);
+                window.renderCustomTab1 = async function(div, tab) {
+                    await (await getElement(div)).append(
+                        `<div>Second render</div>`
+                    );
                 };
             });
 
             await browser.pause(2000);
 
             // switch to new tab and then back
-            await clickElement('.mainTabs .tabAnchor');
-            await clickElement('=Async Tab');
-
-            const render1 = await (
-                await getElement('div=First render')
-            ).isDisplayed();
-            const render2 = await (
-                await getElement('div=Second render')
-            ).isDisplayed();
+            await (await getElement('.mainTabs .tabAnchor'))[0].click();
+            await (await getElement('=Async Tab')).click();
 
             // we haven't re-mounted the tab
             assert(
-                !render2 && render1,
+                (await (await getElement('div=First render')).isDisplayed()) &&
+                    (await (
+                        await getElement('div=Second render')
+                    ).isDisplayed()),
                 "merely switching tabs didn't call mount function"
             );
 
@@ -330,27 +309,27 @@ const runTests = async (pageName, url, tabLocation) => {
             // kinda annoying, i know
             switch (tabLocation) {
                 case 'RESULTS_PAGE':
-                    await browser.execute(() => {
-                        window.urlWrapper.updateRoute({
+                    await browser.execute(async () => {
+                        await window.urlWrapper.updateRoute({
                             gene_list: 'BRAF KRAS',
                         });
                     });
                     break;
                 case 'PATIENT_PAGE':
-                    await (await getElement('.nextPageBtn')).isDisplayed();
-                    await clickElement('.nextPageBtn');
+                    (await (await getElement('.nextPageBtn')).isDisplayed()) &&
+                        (await (await getElement('.nextPageBtn')).click());
                     break;
                 case 'COMPARISON_PAGE':
-                    await clickElement(
-                        "[data-test='groupSelectorButtonMSI/CIMP']"
-                    );
+                    await (
+                        await getElement(
+                            "[data-test='groupSelectorButtonMSI/CIMP']"
+                        )
+                    ).click();
                     break;
                 case 'STUDY_PAGE':
                     // For study page, I do not see a way to evoke a remount (eg. by changing query params)
                     break;
             }
-
-            await browser.pause(2000);
 
             await (await getElement('div=Second render')).waitForDisplayed();
 
@@ -370,7 +349,7 @@ const patientUrl = `${CBIOPORTAL_URL}/patient?studyId=ucec_tcga_pub&caseId=TCGA-
 
 const comparisonUrl = `${CBIOPORTAL_URL}/comparison?comparisonId=61845a6ff8f71021ce56e22b`;
 
-describe('Patient Cohort View Custom Tab Tests', () => {
+describe.only('Patient Cohort View Custom Tab Tests', () => {
     const conf = [
         {
             title: 'Sync Tab',
@@ -415,7 +394,7 @@ describe('Patient Cohort View Custom Tab Tests', () => {
             assert.fail("Async exists when it shouldn't!");
         }
 
-        await clickElement('=Sync Tab');
+        (await getElement('=Sync Tab')).click();
 
         assert.equal(
             await (
@@ -433,7 +412,7 @@ describe('Patient Cohort View Custom Tab Tests', () => {
             'Async tab has showed up'
         );
 
-        await clickElement('.nextPageBtn');
+        (await getElement('.nextPageBtn')).click();
 
         await (await getElement('.mainTabs')).waitForDisplayed();
 
@@ -453,7 +432,7 @@ describe('Patient Cohort View Custom Tab Tests', () => {
 
         await (await getElement('.prevPageBtn')).waitForDisplayed();
 
-        await clickElement('.prevPageBtn');
+        (await getElement('.prevPageBtn')).click();
 
         await (
             await getElement('div=tab for patient TCGA-AP-A053')
