@@ -1,4 +1,4 @@
-const assert = require('assert');
+var assert = require('assert');
 
 const {
     getElement,
@@ -6,12 +6,11 @@ const {
     waitForNetworkQuiet,
     getElementByTestHandle,
     setServerConfiguration,
-    clickElement,
 } = require('../../../shared/specUtils_Async');
 
 const CBIOPORTAL_URL = process.env.CBIOPORTAL_URL.replace(/\/$/, '');
 
-const expressionDataAvailable = async () => {
+async function expressionDataAvailable() {
     return (
         await getElement(
             'span=mRNA Expression. Select one of the profiles below:'
@@ -34,8 +33,8 @@ describe('plots tab expression data with rule configuration', function() {
         const url = `/results/plots?cancer_study_list=acc_tcga_pan_can_atlas_2018%2Cchol_tcga_pan_can_atlas_2018&Z_SCORE_THRESHOLD=2.0&RPPA_SCORE_THRESHOLD=2.0&profileFilter=mutations%2Cstructural_variants%2Cgistic&case_set_id=all&gene_list=CDKN2A%2520MDM2&geneset_list=%20&tab_index=tab_visualize&Action=Submit`;
         await goToUrlAndSetLocalStorage(CBIOPORTAL_URL + url);
 
-        await waitForNetworkQuiet();
-        await clickElement('.Select-arrow-zone');
+        waitForNetworkQuiet();
+        await (await getElement('.Select-arrow-zone')).click();
         await (await getElement('.Select-option')).waitForExist();
         await (await getElement('.Select-option=mRNA')).isExisting();
 
@@ -52,8 +51,8 @@ describe('plots tab expression data with rule configuration', function() {
     it('For multi study query that is NOT all pan_can, no expression data in plots', async () => {
         const url = `/results/plots?cancer_study_list=acc_tcga_pan_can_atlas_2018%2Cchol_tcga&Z_SCORE_THRESHOLD=2.0&RPPA_SCORE_THRESHOLD=2.0&profileFilter=mutations%2Cstructural_variants%2Cgistic&case_set_id=all&gene_list=CDKN2A%2520MDM2&geneset_list=%20&tab_index=tab_visualize&Action=Submit`;
         await goToUrlAndSetLocalStorage(CBIOPORTAL_URL + url);
-        await waitForNetworkQuiet();
-        await clickElement('.Select-arrow-zone');
+        waitForNetworkQuiet();
+        await (await getElement('.Select-arrow-zone')).click();
         await (await getElement('.Select-option=Mutation')).waitForExist();
         assert.equal(
             await (await getElement('.Select-option=mRNA')).isExisting(),
@@ -74,7 +73,7 @@ describe('plots tab expression data with rule configuration', function() {
         const url = `/results/plots?cancer_study_list=chol_tcga&Z_SCORE_THRESHOLD=2.0&RPPA_SCORE_THRESHOLD=2.0&profileFilter=mutations%2Cstructural_variants%2Cgistic&case_set_id=all&gene_list=CDKN2A%2520MDM2&geneset_list=%20&tab_index=tab_visualize&Action=Submit`;
         await goToUrlAndSetLocalStorage(CBIOPORTAL_URL + url);
         await waitForNetworkQuiet();
-        await clickElement('.Select-arrow-zone');
+        await (await getElement('.Select-arrow-zone')).click();
         await (await getElement('.Select-option=Mutation')).waitForExist();
         assert.equal(
             await (await getElement('.Select-option=mRNA')).isExisting(),
@@ -110,7 +109,7 @@ describe('plots tab expression data without rule configuration', function() {
             window.globalStores.appStore.serverConfig.enable_cross_study_expression = undefined;
         });
 
-        await clickElement('.Select-arrow-zone');
+        await (await getElement('.Select-arrow-zone')).click();
         await (await getElement('.Select-option=Mutation')).waitForExist();
         assert.equal(
             await (await getElement('.Select-option=mRNA')).isExisting(),
@@ -143,27 +142,33 @@ describe('expression data in query form', function() {
     });
 
     it('For single study with expression data, we can see expression data', async () => {
-        await clickElement('.studyItem_sarc_tcga_pub');
-        await clickElement('[data-test="queryByGeneButton"]');
+        await (await getElement('.studyItem_sarc_tcga_pub')).click();
+        await (await getElementByTestHandle('queryByGeneButton')).click();
         assert.equal(await expressionDataAvailable(), true);
     });
 
     it("For single study without expression data, we AREN'T offered expression data", async () => {
-        await clickElement('.studyItem_chol_nccs_2013');
-        await clickElement('[data-test="queryByGeneButton"]');
+        await (await getElement('.studyItem_chol_nccs_2013')).click();
+        await (await getElementByTestHandle('queryByGeneButton')).click();
         assert.equal(await expressionDataAvailable(), false);
     });
 
     it("For two studies with expression data (only one pancan) we AREN'T offered expression data", async () => {
-        await clickElement('.studyItem_sarc_tcga_pub');
-        await clickElement('.studyItem_chol_tcga_pan_can_atlas_2018');
-        await clickElement('[data-test="queryByGeneButton"]');
+        await (await getElement('.studyItem_sarc_tcga_pub')).click();
+        await (
+            await getElement('.studyItem_chol_tcga_pan_can_atlas_2018')
+        ).click();
+        await (await getElementByTestHandle('queryByGeneButton')).click();
         assert.equal(await expressionDataAvailable(), false);
     });
 
     it('For two studies (both pan can) with expression data we ARE offered expression data', async () => {
-        await clickElement('.studyItem_brca_tcga_pan_can_atlas_2018');
-        await clickElement('.studyItem_chol_tcga_pan_can_atlas_2018');
+        await (
+            await getElement('.studyItem_brca_tcga_pan_can_atlas_2018')
+        ).click();
+        await (
+            await getElement('.studyItem_chol_tcga_pan_can_atlas_2018')
+        ).click();
         await (await getElementByTestHandle('queryByGeneButton')).click();
         assert.equal(await expressionDataAvailable(), true);
     });
@@ -179,15 +184,23 @@ describe('cross study expression data without configuration rule', () => {
     });
 
     it('without configuration rule, no multi study expression', async () => {
-        await clickElement('.studyItem_brca_tcga_pan_can_atlas_2018');
-        await clickElement('.studyItem_chol_tcga_pan_can_atlas_2018');
+        await (
+            await getElement('.studyItem_brca_tcga_pan_can_atlas_2018')
+        ).click();
+        await (
+            await getElement('.studyItem_chol_tcga_pan_can_atlas_2018')
+        ).click();
         await (await getElementByTestHandle('queryByGeneButton')).click();
         assert.equal(await expressionDataAvailable(), false);
     });
 
     it('without configuration rule, single study expression available', async () => {
-        await clickElement('.studyItem_brca_tcga_pan_can_atlas_2018');
-        await clickElement('.studyItem_chol_tcga_pan_can_atlas_2018');
+        await (
+            await getElement('.studyItem_brca_tcga_pan_can_atlas_2018')
+        ).click();
+        await (
+            await getElement('.studyItem_chol_tcga_pan_can_atlas_2018')
+        ).click();
         await (await getElementByTestHandle('queryByGeneButton')).click();
         assert.equal(await expressionDataAvailable(), false);
     });
@@ -203,21 +216,24 @@ describe('custom expression comparison rule', () => {
     });
 
     it('with all pancan, expression NOT available', async () => {
-        await clickElement('.studyItem_brca_tcga_pan_can_atlas_2018');
-        await clickElement('.studyItem_chol_tcga_pan_can_atlas_2018');
+        await (await $('.studyItem_brca_tcga_pan_can_atlas_2018')).click();
+        await (await $('.studyItem_chol_tcga_pan_can_atlas_2018')).click();
         await (await getElementByTestHandle('queryByGeneButton')).click();
+
         assert.equal(await expressionDataAvailable(), false);
     });
 
     it('configuration rule is satisfied and expression available across study', async () => {
-        await clickElement('.studyItem_chol_tcga');
-        await clickElement('.studyItem_gbm_cptac_2021');
+        await (await getElement('.studyItem_chol_tcga')).click();
+        await (await getElement('.studyItem_gbm_cptac_2021')).click();
         await (await getElementByTestHandle('queryByGeneButton')).click();
         assert.equal(await expressionDataAvailable(), true);
     });
 
     it('single study still has expression despite rule', async () => {
-        await clickElement('.studyItem_chol_tcga_pan_can_atlas_2018');
+        await (
+            await getElement('.studyItem_chol_tcga_pan_can_atlas_2018')
+        ).click();
         await (await getElementByTestHandle('queryByGeneButton')).click();
         assert.equal(await expressionDataAvailable(), true);
     });
