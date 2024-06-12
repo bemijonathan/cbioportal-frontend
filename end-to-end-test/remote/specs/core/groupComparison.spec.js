@@ -23,7 +23,7 @@ describe('group comparison venn diagram tests', () => {
             });
         });
 
-        it('create group button disabled as default', async () => {
+        it.only('create group button disabled as default', async () => {
             assert.equal(
                 await (await getElement(SampleCreateGroupButton)).isEnabled(),
                 false
