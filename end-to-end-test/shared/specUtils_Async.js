@@ -53,8 +53,8 @@ function waitForPatientView(timeout) {
     });
 }
 
-async function waitForOncoprint(timeout = 100000) {
-    await browser.pause(500); // give oncoprint time to disappear
+async function waitForOncoprint(timeout) {
+    await browser.pause(200); // give oncoprint time to disappear
     await browser.waitUntil(
         async () => {
             return (
@@ -65,7 +65,7 @@ async function waitForOncoprint(timeout = 100000) {
         },
         { timeout }
     );
-    await browser.pause(500);
+    await browser.pause(200);
 }
 
 function waitForComparisonTab() {
@@ -77,6 +77,7 @@ async function getTextInOncoprintLegend() {
     const texts = await Promise.all(elements.map(t => t.getHTML(false)));
     return texts.join(' ');
 }
+
 async function setSettingsMenuOpen(open, buttonId = 'GlobalSettingsButton') {
     const button = 'button[data-test="' + buttonId + '"]';
     const dropdown = 'div[data-test="GlobalSettingsDropdown"]';
@@ -124,12 +125,6 @@ async function getColorByTestHandle(testHandle, type = 'color') {
     return color.parsed.hex;
 }
 
-async function getCSSProperty(selector, property) {
-    const element = await getElement(selector);
-    const { value } = await element.getCSSProperty(property);
-    return value;
-}
-
 /**
  * @param {string} selector
  * @param {number} index
@@ -142,7 +137,7 @@ async function getColorOfNthElement(selector, index, type = 'color') {
     return color.parsed.hex;
 }
 
-async function setOncoprintMutationsMenuOpen(open) {
+function setOncoprintMutationsMenuOpen(open) {
     const mutationColorMenuButton = '#mutationColorDropdown';
     const mutationColorMenuDropdown =
         'div.oncoprint__controls__mutation_color_menu';
@@ -426,9 +421,7 @@ async function setInputText(selector, text) {
     // await (await $(selector)).click();
     //browser.keys('\uE003'.repeat($(selector).getValue().length));
 
-    // await (await $(selector)).clearValue();
-
-    await (await $(selector)).setValue('');
+    await (await $(selector)).clearValue();
     //browser.pause(1000);
 
     await (await $(selector)).setValue(text);
@@ -527,7 +520,7 @@ async function checkElementWithTemporaryClass(
         temporaryClass
     );
     await browser.pause(pauseTime);
-    const res = await browser.checkElement(selectorForChecking, '', options);
+    var res = await browser.checkElement(selectorForChecking, '', options);
     await browser.execute(
         function(selectorForTemporaryClass, temporaryClass) {
             $(selectorForTemporaryClass).removeClass(temporaryClass);
@@ -801,7 +794,7 @@ async function getElement(selector, options = {}) {
  * @param {object} options  options for the element
  * @returns  {Promise<WebdriverIO.ElementArray>}
  */
-async function getNthElements(selector, index, options = {}) {
+async function getNthElements(selector, index, options) {
     let els;
     if (/^handle=/.test(selector)) {
         els = await $$(selector.replace(/^handle=/, ''));
