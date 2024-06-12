@@ -1,11 +1,9 @@
-const assert = require('assert');
+var assert = require('assert');
 const {
     goToUrlAndSetLocalStorage,
     getElementByTestHandle,
     waitForNetworkQuiet,
     getElement,
-    getText,
-    clickElement,
 } = require('../../../shared/specUtils_Async');
 
 const CBIOPORTAL_URL = process.env.CBIOPORTAL_URL.replace(/\/$/, '');
@@ -35,19 +33,25 @@ describe('Patient View Genomic Evolution tab', function() {
                     'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
                 )
             ).waitForExist();
-            let numMutationsText = await getText(
-                'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
-            );
+            let numMutationsText = await (
+                await getElement(
+                    'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
+                )
+            ).getText();
             let numMutations = parseInt(numMutationsText, 10);
             assert(numMutations > 2);
 
             // now select two mutations
-            await clickElement(
-                'div[data-test="GenomicEvolutionMutationTable"] table tbody > tr:nth-child(1)'
-            );
-            await clickElement(
-                'div[data-test="GenomicEvolutionMutationTable"] table tbody > tr:nth-child(4)'
-            );
+            await (
+                await getElement(
+                    'div[data-test="GenomicEvolutionMutationTable"] table tbody > tr:nth-child(1)'
+                )
+            ).click();
+            await (
+                await getElement(
+                    'div[data-test="GenomicEvolutionMutationTable"] table tbody > tr:nth-child(4)'
+                )
+            ).click();
 
             // should still show all
             await (
@@ -55,19 +59,25 @@ describe('Patient View Genomic Evolution tab', function() {
                     'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
                 )
             ).waitForExist();
-            numMutationsText = await getText(
-                'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
-            );
+            numMutationsText = await (
+                await getElement(
+                    'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
+                )
+            ).getText();
             numMutations = parseInt(numMutationsText, 10);
             assert(numMutations > 2);
 
             // now select "show only highlighted"
-            await clickElement('input[data-test="TableShowOnlyHighlighted"]');
+            await (
+                await getElement('input[data-test="TableShowOnlyHighlighted"]')
+            ).click();
             await browser.waitUntil(
                 async () => {
-                    numMutationsText = await getText(
-                        'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
-                    );
+                    numMutationsText = await (
+                        await getElement(
+                            'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
+                        )
+                    ).getText();
                     numMutations = parseInt(numMutationsText, 10);
                     return numMutations === 2;
                 },
@@ -76,14 +86,18 @@ describe('Patient View Genomic Evolution tab', function() {
             );
 
             // now click on one of the 2 mutations
-            await clickElement(
-                'div[data-test="GenomicEvolutionMutationTable"] table tbody > tr:nth-child(1)'
-            );
+            await (
+                await getElement(
+                    'div[data-test="GenomicEvolutionMutationTable"] table tbody > tr:nth-child(1)'
+                )
+            ).click();
             await browser.waitUntil(
                 async () => {
-                    numMutationsText = await getText(
-                        'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
-                    );
+                    numMutationsText = await (
+                        await getElement(
+                            'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
+                        )
+                    ).getText();
                     numMutations = parseInt(numMutationsText, 10);
                     return numMutations === 1;
                 },
@@ -92,14 +106,18 @@ describe('Patient View Genomic Evolution tab', function() {
             );
 
             // now click on the last remaining mutation
-            await clickElement(
-                'div[data-test="GenomicEvolutionMutationTable"] table tbody > tr:nth-child(1)'
-            );
+            await (
+                await getElement(
+                    'div[data-test="GenomicEvolutionMutationTable"] table tbody > tr:nth-child(1)'
+                )
+            ).click();
             await browser.waitUntil(
                 async () => {
-                    numMutationsText = await getText(
-                        'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
-                    );
+                    numMutationsText = await (
+                        await getElement(
+                            'div[data-test="GenomicEvolutionMutationTable"] span[data-test="LazyMobXTable_CountHeader"]'
+                        )
+                    ).getText();
                     numMutations = parseInt(numMutationsText, 10);
                     return numMutations > 2;
                 },
