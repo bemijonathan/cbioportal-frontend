@@ -298,7 +298,7 @@ async function waitForNumberOfStudyCheckboxes(expectedNumber, text) {
     });
 }
 
-function getNthOncoprintTrackOptionsElements(n) {
+async function getNthOncoprintTrackOptionsElements(n) {
     // n is one-indexed
 
     const button_selector =
@@ -307,9 +307,9 @@ function getNthOncoprintTrackOptionsElements(n) {
         '#oncoprintDiv .oncoprintjs__track_options__dropdown.nth-' + n;
 
     return {
-        button: $(button_selector),
+        button: await $(button_selector),
         button_selector,
-        dropdown: $(dropdown_selector),
+        dropdown: await $(dropdown_selector),
         dropdown_selector,
     };
 }
@@ -549,15 +549,19 @@ function checkElementWithElementHidden(selector, selectorToHide, options) {
 }
 
 async function clickQueryByGeneButton() {
-    const el = await $('.disabled[data-test=queryByGeneButton]');
-    await el.waitForExist({
-        reverse: true,
-    });
+    // TODO: does this really happen ? do we need to wait for it to disappear?
+    // const el = await $('.disabled[data-test="queryByGeneButton"]');
+    // await el.waitForExist({
+    //     reverse: true,
+    //     timeout: 5000
+    // });
     //const el = await getElementByTestHandle('queryByGeneButton');
     await clickElement('handle=queryByGeneButton');
 
     const body = await $('body');
     await body.scrollIntoView();
+
+    await browser.pause(500);
 }
 
 function clickModifyStudySelectionButton() {
