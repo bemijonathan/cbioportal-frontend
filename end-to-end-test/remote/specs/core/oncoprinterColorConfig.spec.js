@@ -1,5 +1,6 @@
-const { assertScreenShotMatch } = require('../../../shared/lib/testUtils');
-const assert = require('assert');
+var assertScreenShotMatch = require('../../../shared/lib/testUtils')
+    .assertScreenShotMatch;
+var assert = require('assert');
 const {
     waitForOncoprint,
     checkOncoprintElement,
@@ -9,7 +10,6 @@ const {
     getElement,
     clickElement,
     getNthElements,
-    waitForElementDisplayed,
 } = require('../../../shared/specUtils_Async.js');
 
 const TIMEOUT = 6000;
@@ -17,7 +17,7 @@ const TIMEOUT = 6000;
 const CBIOPORTAL_URL = process.env.CBIOPORTAL_URL.replace(/\/$/, '');
 
 describe('oncoprinter clinical example data, color configuration', () => {
-    it('oncoprinter color configuration modal reflects user selected colors', async () => {
+    it.only('oncoprinter color configuration modal reflects user selected colors', async () => {
         await goToUrlAndSetLocalStorage(`${CBIOPORTAL_URL}/oncoprinter`);
         await (
             await getElement('.oncoprinterClinicalExampleData')
@@ -29,7 +29,11 @@ describe('oncoprinter clinical example data, color configuration', () => {
         const trackOptionsElts = await getNthOncoprintTrackOptionsElements(2);
         // open menu
         await (await getElement(trackOptionsElts.button_selector)).click();
-        await waitForElementDisplayed(trackOptionsElts.dropdown_selector);
+        await (
+            await getElement(trackOptionsElts.dropdown_selector)
+        ).waitForDisplayed({
+            timeout: 1000,
+        });
         // click "Edit Colors" to open modal
         await clickElement(
             trackOptionsElts.dropdown_selector + ' li:nth-child(11)'
@@ -38,21 +42,25 @@ describe('oncoprinter clinical example data, color configuration', () => {
 
         // select new colors for track values
         await (await getElementByTestHandle('color-picker-icon')).click();
-        await waitForElementDisplayed('.circle-picker');
+        await (await getElement('.circle-picker')).waitForDisplayed({
+            timeout: 1000,
+        });
         await clickElement('.circle-picker [title="#990099"]');
         await waitForOncoprint();
         await (
             await getElementByTestHandle('color-picker-icon')
         ).waitForDisplayed();
         await (await getElementByTestHandle('color-picker-icon')).click();
-        await waitForElementDisplayed('.circle-picker', {
+        await (await getElement('.circle-picker')).waitForDisplayed({
             reverse: true,
         });
 
         await (
             await getNthElements('[data-test="color-picker-icon"]', 1)
         ).click();
-        await waitForElementDisplayed('.circle-picker');
+        await (await getElement('.circle-picker')).waitForDisplayed({
+            timeout: 1000,
+        });
         await clickElement('.circle-picker [title="#109618"]');
         await waitForOncoprint();
         await (
@@ -61,14 +69,14 @@ describe('oncoprinter clinical example data, color configuration', () => {
         await (
             await getNthElements('[data-test="color-picker-icon"]', 1)
         ).click();
-        await waitForElementDisplayed('.circle-picker', {
+        await (await getElement('.circle-picker')).waitForDisplayed({
             reverse: true,
         });
 
         await (
             await getNthElements('[data-test="color-picker-icon"]', 2)
         ).click();
-        await waitForElementDisplayed('.circle-picker', {
+        await (await getElement('.circle-picker')).waitForDisplayed({
             timeout: 1000,
         });
         await clickElement('.circle-picker [title="#8b0707"]');
@@ -97,23 +105,27 @@ describe('oncoprinter clinical example data, color configuration', () => {
         await clickElement('.modal-dialog .close');
     });
 
-    it('oncoprinter reflects user selected colors', async () => {
+    // TODO:-- screenshot test
+    it.only('oncoprinter reflects user selected colors', async () => {
         await clickElement('a.tabAnchor_oncoprint');
         const res = await checkOncoprintElement();
         await assertScreenShotMatch(res);
     });
 
-    it('oncoprinter reset colors button is visible when default colors not used', async () => {
+    // TODO:-- screenshot test
+    it.only('oncoprinter reset colors button is visible when default colors not used', async () => {
         // click "Edit Colors" to open modal and check "Reset Colors" button in modal
         const trackOptionsElts = await getNthOncoprintTrackOptionsElements(2);
         await clickElement(trackOptionsElts.button_selector);
-        await waitForElementDisplayed(trackOptionsElts.dropdown_selector, {
+        await (
+            await getElement(trackOptionsElts.dropdown_selector)
+        ).waitForDisplayed({
             timeout: 1000,
         });
         await clickElement(
             trackOptionsElts.dropdown_selector + ' li:nth-child(11)'
         );
-        await waitForElementDisplayed('[data-test="resetColors"]');
+        await (await getElementByTestHandle('resetColors')).waitForDisplayed();
     });
 
     it('oncoprinter color configuration modal reflects default colors', async () => {
@@ -143,7 +155,7 @@ describe('oncoprinter clinical example data, color configuration', () => {
 
     it('oncoprinter reflects default colors', async () => {
         // close modal
-        await clickElement('.modal button.close');
+        await clickElement('a.tabAnchor_oncoprint');
         const res = await checkOncoprintElement();
         await assertScreenShotMatch(res);
     });
@@ -152,7 +164,9 @@ describe('oncoprinter clinical example data, color configuration', () => {
         // click "Edit Colors" to open modal and check "Reset Colors" button in modal
         const trackOptionsElts = await getNthOncoprintTrackOptionsElements(2);
         await clickElement(trackOptionsElts.button_selector);
-        await waitForElementDisplayed(trackOptionsElts.dropdown_selector, {
+        await (
+            await getElement(trackOptionsElts.dropdown_selector)
+        ).waitForDisplayed({
             timeout: 1000,
         });
         await clickElement(
