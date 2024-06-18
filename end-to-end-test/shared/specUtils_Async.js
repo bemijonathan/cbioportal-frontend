@@ -320,13 +320,9 @@ async function getNthOncoprintTrackOptionsElements(n) {
         '#oncoprintDiv .oncoprintjs__track_options__dropdown.nth-' + n;
 
     return {
-        button: await $(button_selector, {
-            timeout: 20000,
-        }),
+        button: await $(button_selector),
         button_selector,
-        dropdown: await $(dropdown_selector, {
-            timeout: 20000,
-        }),
+        dropdown: await $(dropdown_selector),
         dropdown_selector,
     };
 }
@@ -589,7 +585,7 @@ async function clickQueryByGeneButton() {
     const body = await $('body');
     await body.scrollIntoView();
 
-    await browser.pause(1000);
+    await browser.pause(500);
 }
 
 async function clickModifyStudySelectionButton() {
