@@ -3,7 +3,6 @@ const {
     waitForOncoprint,
     setOncoprintMutationsMenuOpen,
     goToUrlAndSetLocalStorage,
-    setInputText,
     getElement,
     isSelected,
     clickElement,

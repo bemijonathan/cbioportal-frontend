@@ -284,16 +284,6 @@ const goToUrlAndSetLocalStorageWithProperty = (url, authenticated, props) => {
     goToUrlAndSetLocalStorage(url, authenticated);
 };
 
-async function waitForElementDisplayed(selector, options = {}) {
-    const element = await getElement(selector, options);
-    await element.waitForDisplayed({
-        timeout: options.timeout || 10000,
-        ...options,
-    });
-
-    return element;
-}
-
 function sessionServiceIsEnabled() {
     return browser.execute(function() {
         return window.getServerConfig().sessionServiceEnabled;
@@ -736,14 +726,10 @@ async function jq(selector) {
     }, selector);
 }
 
-const openAlterationTypeSelectionMenu = async () => {
-    await $(
-        '[data-test=AlterationEnrichmentTypeSelectorButton]'
-    ).waitForExist();
-    await clickElement('[data-test=AlterationEnrichmentTypeSelectorButton]');
-    await (
-        await getElement('[data-test=AlterationTypeSelectorMenu]')
-    ).waitForDisplayed();
+var openAlterationTypeSelectionMenu = () => {
+    $('[data-test=AlterationEnrichmentTypeSelectorButton]').waitForExist();
+    $('[data-test=AlterationEnrichmentTypeSelectorButton]').click();
+    $('[data-test=AlterationTypeSelectorMenu]').waitForDisplayed();
 };
 
 function strIsNumeric(str) {
