@@ -53,7 +53,7 @@ describe('clinical timeline', () => {
         // this doesn't work too well
         await moo.dragAndDrop({ x: 300, y: 0, duration: 10000 }, 10000);
 
-        await (await getElement('body')).moveTo({ x: 0, y: 0 });
+        (await getElement('body')).moveTo({ x: 0, y: 0 });
 
         const res = checkElementWithMouseDisabled('.tl-timeline-wrapper');
     });

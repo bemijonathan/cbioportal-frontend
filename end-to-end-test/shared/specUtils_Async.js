@@ -54,7 +54,7 @@ function waitForPatientView(timeout) {
 }
 
 async function waitForOncoprint(timeout) {
-    await browser.pause(200); // give oncoprint time to disappear
+    await browser.pause(500); // give oncoprint time to disappear
     await browser.waitUntil(
         async () => {
             return (
@@ -65,7 +65,7 @@ async function waitForOncoprint(timeout) {
         },
         { timeout }
     );
-    await browser.pause(200);
+    await browser.pause(500);
 }
 
 function waitForComparisonTab() {
@@ -77,7 +77,6 @@ async function getTextInOncoprintLegend() {
     const texts = await Promise.all(elements.map(t => t.getHTML(false)));
     return texts.join(' ');
 }
-
 async function setSettingsMenuOpen(open, buttonId = 'GlobalSettingsButton') {
     const button = 'button[data-test="' + buttonId + '"]';
     const dropdown = 'div[data-test="GlobalSettingsDropdown"]';
@@ -125,6 +124,12 @@ async function getColorByTestHandle(testHandle, type = 'color') {
     return color.parsed.hex;
 }
 
+async function getCSSProperty(selector, property) {
+    const element = await getElement(selector);
+    const { value } = await element.getCSSProperty(property);
+    return value;
+}
+
 /**
  * @param {string} selector
  * @param {number} index
@@ -137,7 +142,7 @@ async function getColorOfNthElement(selector, index, type = 'color') {
     return color.parsed.hex;
 }
 
-function setOncoprintMutationsMenuOpen(open) {
+async function setOncoprintMutationsMenuOpen(open) {
     const mutationColorMenuButton = '#mutationColorDropdown';
     const mutationColorMenuDropdown =
         'div.oncoprint__controls__mutation_color_menu';
@@ -269,20 +274,33 @@ async function goToUrlAndSetLocalStorage(url, authenticated = false) {
     await browser.pause(1000);
 }
 
-const setServerConfiguration = serverConfig => {
-    browser.execute(function(_serverConfig) {
-        this.localStorage.setItem(
-            'frontendConfig',
-            JSON.stringify({ serverConfig: _serverConfig })
-        );
-    }, serverConfig);
-};
-
 const goToUrlAndSetLocalStorageWithProperty = (url, authenticated, props) => {
     goToUrlAndSetLocalStorage(url, authenticated);
     setServerConfiguration(props);
     goToUrlAndSetLocalStorage(url, authenticated);
 };
+
+function setServerConfiguration(props) {
+    browser.execute(
+        function(frontendConf) {
+            this.localStorage.setItem(
+                'frontendConfig',
+                JSON.stringify(frontendConf)
+            );
+        },
+        { serverConfig: props }
+    );
+}
+
+async function waitForElementDisplayed(selector, options = {}) {
+    const element = await getElement(selector, options);
+    await element.waitForDisplayed({
+        timeout: options.timeout || 10000,
+        ...options,
+    });
+
+    return element;
+}
 
 function sessionServiceIsEnabled() {
     return browser.execute(function() {
@@ -506,7 +524,7 @@ async function checkElementWithTemporaryClass(
         temporaryClass
     );
     await browser.pause(pauseTime);
-    var res = await browser.checkElement(selectorForChecking, '', options);
+    const res = await browser.checkElement(selectorForChecking, '', options);
     await browser.execute(
         function(selectorForTemporaryClass, temporaryClass) {
             $(selectorForTemporaryClass).removeClass(temporaryClass);
@@ -726,10 +744,23 @@ async function jq(selector) {
     }, selector);
 }
 
-var openAlterationTypeSelectionMenu = () => {
-    $('[data-test=AlterationEnrichmentTypeSelectorButton]').waitForExist();
-    $('[data-test=AlterationEnrichmentTypeSelectorButton]').click();
-    $('[data-test=AlterationTypeSelectorMenu]').waitForDisplayed();
+function setServerConfiguration(serverConfig) {
+    browser.execute(function(_serverConfig) {
+        this.localStorage.setItem(
+            'frontendConfig',
+            JSON.stringify({ serverConfig: _serverConfig })
+        );
+    }, serverConfig);
+}
+
+var openAlterationTypeSelectionMenu = async () => {
+    await $(
+        '[data-test=AlterationEnrichmentTypeSelectorButton]'
+    ).waitForExist();
+    await clickElement('[data-test=AlterationEnrichmentTypeSelectorButton]');
+    await (
+        await getElement('[data-test=AlterationTypeSelectorMenu]')
+    ).waitForDisplayed();
 };
 
 function strIsNumeric(str) {
@@ -776,7 +807,7 @@ async function getElement(selector, options = {}) {
  * @param {object} options  options for the element
  * @returns  {Promise<WebdriverIO.ElementArray>}
  */
-async function getNthElements(selector, index, options) {
+async function getNthElements(selector, index, options = {}) {
     let els;
     if (/^handle=/.test(selector)) {
         els = await $$(selector.replace(/^handle=/, ''));

@@ -10,7 +10,7 @@ const {
     getElement,
     clickElement,
 } = require('../../../shared/specUtils_Async');
-
+const expect = require('chai').expect;
 const { assertScreenShotMatch } = require('../../../shared/lib/testUtils');
 const CBIOPORTAL_URL = process.env.CBIOPORTAL_URL.replace(/\/$/, '');
 
@@ -19,10 +19,7 @@ const patientViewUrl = `${CBIOPORTAL_URL}/patient/genomicEvolution?caseId=P04&st
 describe('Patient View Genomic Evolution tab screenshot tests', () => {
     before(async () => {
         await goToUrlAndSetLocalStorage(patientViewUrl);
-        await browser.pause(2000);
-        await (await getElement('a.tabAnchor_lineChart')).waitForDisplayed({
-            timeout: 20000,
-        });
+        await (await getElement('a.tabAnchor_lineChart')).waitForDisplayed();
         await clickElement('a.tabAnchor_lineChart');
         await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
         await (
@@ -81,7 +78,7 @@ describe('Patient View Genomic Evolution tab screenshot tests', () => {
     it('pvge only show highlighted in line chart', async () => {
         await setCheckboxChecked(false, 'input[data-test="VAFSequentialMode"]');
         await setCheckboxChecked(true, 'input[data-test="VAFOnlyHighlighted"]');
-        await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
+
         const res = await browser.checkElement('[data-test=VAFChartWrapper]');
         assertScreenShotMatch(res);
     });

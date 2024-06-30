@@ -105,14 +105,17 @@ describe('study laml_tcga tests', () => {
             "[data-test='fixed-header-table-search-input']",
             'Other Sample ID'
         );
-        await browser.pause(2000);
         await (
             await getElement(
                 "[data-test='add-chart-option-other-sample-id'] input"
             )
         ).waitForDisplayed({ timeout: WAIT_FOR_VISIBLE_TIMEOUT });
+
+        // Pause a bit time to let the table render
+        await waitForStudyView();
+
         await clickElement(
-            "[data-test='add-chart-option-other-sample-id'] label"
+            "[data-test='add-chart-option-other-sample-id'] input"
         );
         await browser.pause(2000);
         await (
@@ -884,9 +887,8 @@ describe('submit genes to results view query', () => {
             const url = `${CBIOPORTAL_URL}/study?id=chol_tcga_pan_can_atlas_2018`;
             await goToUrlAndSetLocalStorage(url);
             await waitForNetworkQuiet();
-            await browser.pause(2000);
         });
-        it.skip('generic assay chart should be added in the summary tab', async function() {
+        it('generic assay chart should be added in the summary tab', async function() {
             this.retries(0);
             await browser.waitUntil(
                 async () => {
@@ -902,12 +904,10 @@ describe('submit genes to results view query', () => {
                 { timeout: 60000 }
             );
             await clickElement(ADD_CHART_BUTTON);
-            await browser.pause(5000);
+
             // Change to GENERIC ASSAY tab
             await (
-                await getElement(ADD_CHART_GENERIC_ASSAY_TAB, {
-                    timeout: WAIT_FOR_VISIBLE_TIMEOUT,
-                })
+                await getElement(ADD_CHART_GENERIC_ASSAY_TAB)
             ).waitForDisplayed({
                 timeout: WAIT_FOR_VISIBLE_TIMEOUT,
             });
