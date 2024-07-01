@@ -271,6 +271,7 @@ async function goToUrlAndSetLocalStorage(url, authenticated = false) {
         console.log('Connecting to: ' + `${url}${prefix}${urlparam}=true`);
     }
     if (needToLogin) keycloakLogin(10000);
+    await browser.pause(1000);
 }
 
 const goToUrlAndSetLocalStorageWithProperty = (url, authenticated, props) => {
