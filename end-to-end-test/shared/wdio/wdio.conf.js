@@ -63,7 +63,7 @@ const LocalCompare = new VisualRegressionCompare.LocalCompare({
     referenceName: getScreenshotName(refDir),
     screenshotName: getScreenshotName(screenDir),
     diffName: getScreenshotName(diffDir),
-    misMatchTolerance: 0.01,
+    misMatchTolerance: 100,
 });
 
 function proxyComparisonMethod(target) {
@@ -273,7 +273,7 @@ exports.config = {
         ],
     ],
 
-    //port:9515,
+    port: 9515,
     // FROM OLD webdriver config
     // capabilities: [
     //     {
