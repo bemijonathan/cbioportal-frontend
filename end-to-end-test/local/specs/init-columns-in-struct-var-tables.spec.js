@@ -47,7 +47,7 @@ describe('namespace columns in structural variant tables', function() {
     });
 });
 
-defaultColumnsAreDisplayed = () => {
+const defaultColumnsAreDisplayed = () => {
     const patientStructVarTable = 'patientview-structural-variant-table';
     return (
         $("//span[text() = '" + DEFAULT_COLS.GENE_1 + "']").waitForDisplayed({

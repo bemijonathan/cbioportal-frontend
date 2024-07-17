@@ -1,3 +1,5 @@
+const { getElement } = require('../../shared/specUtils_Async');
+
 const clickColumnSelectionButton = patientCnaTable => {
     $(`[data-test=${patientCnaTable}]`)
         .$('button*=Columns')
@@ -8,8 +10,8 @@ const selectColumn = namespaceColumn1 => {
     $(`[data-id="${namespaceColumn1}"]`).click();
 };
 
-const waitForTable = table => {
-    $(`[data-test=${table}]`).waitForDisplayed();
+const waitForTable = async table => {
+    await (await getElement(`[data-test=${table}]`)).waitForDisplayed();
 };
 
 const namespaceColumnsAreDisplayed = columns => {
