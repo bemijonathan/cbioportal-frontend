@@ -23,25 +23,23 @@ const { getCSSProperty } = require('../../../shared/specUtils_Async');
 const CBIOPORTAL_URL = process.env.CBIOPORTAL_URL.replace(/\/$/, '');
 
 describe('merged tracks', () => {
-    before(async () => {
+    it('oncoprint loads and expands a merged track', async () => {
         await goToUrlAndSetLocalStorage(
             `${CBIOPORTAL_URL}/results/oncoprint?Action=Submit&RPPA_SCORE_THRESHOLD=2.0&Z_SCORE_THRESHOLD=2.0&cancer_study_list=coadread_tcga&case_set_id=coadread_tcga_cnaseq&data_priority=0&gene_list=%255B%2522RAS%2522%2520KRAS%2520NRAS%2520HRAS%255D&geneset_list=%20&genetic_profile_ids_PROFILE_COPY_NUMBER_ALTERATION=coadread_tcga_gistic&genetic_profile_ids_PROFILE_MUTATION_EXTENDED=coadread_tcga_mutations&tab_index=tab_visualize`
         );
         await waitForOncoprint();
-    });
-    it('oncoprint loads and expands a merged track', async () => {
+
         const trackOptionsElts = await getNthOncoprintTrackOptionsElements(1);
-        await (await getElement(trackOptionsElts.button_selector)).moveTo();
+        // open menu
         await clickElement(trackOptionsElts.button_selector);
         await waitForElementDisplayed(trackOptionsElts.dropdown_selector, {
-            timeout: 10000,
+            timeout: 1000,
         });
         // click expand
         await clickElement(
             trackOptionsElts.dropdown_selector + ' li:nth-child(3)'
         );
-
-        browser.pause(10000); // give time for track to expand
+        await waitForOncoprint();
 
         const res = await browser.checkElement('.oncoprintContainer', '', {
             hide: ['.oncoprint__controls'],
@@ -456,7 +454,7 @@ describe('oncoprint', function() {
         it('should sort patients and samples by custom case list order correctly', async () => {
             async function doCustomCaseOrderTest() {
                 // now we're on results page
-                await waitForOncoprint(100000);
+                await waitForOncoprint();
 
                 // make sure we are in sample mode
                 await clickElement(
@@ -511,14 +509,11 @@ describe('oncoprint', function() {
             }
 
             await goToUrlAndSetLocalStorage(CBIOPORTAL_URL);
-            await browser.pause(5000);
 
             // select Colorectal TCGA and Adrenocortical Carcinoma TCGA
             const inputSelector =
                 'div[data-test=study-search] input[type="text"]';
-            await (await getElement(inputSelector)).waitForDisplayed({
-                timeout: 100000,
-            });
+            await getElement(inputSelector, { timeout: 10000 });
             await setInputText(inputSelector, 'colorectal tcga nature');
             await waitForNumberOfStudyCheckboxes(1);
             await getElement('[data-test="StudySelect"]', { timeout: 10000 });
@@ -533,22 +528,16 @@ describe('oncoprint', function() {
                 'Adrenocortical Carcinoma (TCGA, Firehose Legacy)'
             );
 
-            await (
-                await getElement('[data-test="StudySelect"]')
-            ).waitForDisplayed();
-            await browser.pause(1000); // let things trigger
+            await getElement('[data-test="StudySelect"]', { timeout: 10000 });
             await clickElement('[data-test="StudySelect"] input');
 
             await clickQueryByGeneButton();
 
-            await browser.pause(10000); // let things trigger
-            const molecularProfileSelector = await getElement(
-                '[data-test="molecularProfileSelector"]',
-                {
-                    timeout: 20000,
-                }
-            );
+            await browser.pause(5000); // let things trigger
 
+            const molecularProfileSelector = await getElement(
+                '[data-test="molecularProfileSelector"]'
+            );
             await molecularProfileSelector.waitForExist({ timeout: 10000 });
             // Check for the "Mutations" checkbox
             const mutationsLabel = await molecularProfileSelector.$(
@@ -557,13 +546,13 @@ describe('oncoprint', function() {
             const mutationsCheckbox = await mutationsLabel.$(
                 'input[type="checkbox"]'
             );
-            await mutationsCheckbox.waitForExist({ timeout: 20000 });
+            await mutationsCheckbox.waitForExist({ timeout: 10000 });
 
             // Check for the "Putative copy-number alterations from GISTIC" checkbox
             const alterationsLabel = await molecularProfileSelector.$(
                 'label*=Putative copy-number alterations from GISTIC'
             );
-            await alterationsLabel.waitForExist({ timeout: 10000 });
+            alterationsLabel.waitForExist({ timeout: 10000 });
             const alterationsCheckbox = await alterationsLabel.$(
                 'input[type="checkbox"]'
             );

@@ -8,8 +8,8 @@ const {
 
 const CBIOPORTAL_URL = process.env.CBIOPORTAL_URL.replace(/\/$/, '');
 
-const getBrowserHeight = async () => {
-    return Number((await browser.getWindowSize()).height);
+const getBrowserHeight = () => {
+    return Number(browser.getWindowSize().height);
 };
 
 const customTabBase = location => {
@@ -44,24 +44,11 @@ const goToUrlWithCustomTabConfig = async (url, custom_tabs) => {
     await browser.url(`${CBIOPORTAL_URL}/blank`);
     setServerConfiguration({ custom_tabs });
     await goToUrlAndSetLocalStorage(url);
-};
-
-const waitForMainTabs = async () => {
-    await browser.waitUntil(
-        async () => {
-            return await (await getElement('.mainTabs')).isDisplayed();
-        },
-        { timeout: 50000 }
-    );
+    await browser.pause(2000);
 };
 
 const runTests = async (pageName, url, tabLocation) => {
     describe(`${pageName} Custom Tabs`, () => {
-        before(
-            async () =>
-                await browser.setWindowSize(2000, await getBrowserHeight())
-        );
-
         it.skip('Sync and async hide/show works', async function() {
             this.retries(0);
 
@@ -75,7 +62,7 @@ const runTests = async (pageName, url, tabLocation) => {
                 };
             });
 
-            await waitForMainTabs();
+            await (await getElement('.mainTabs')).waitForDisplayed();
 
             assert.equal(
                 await (await getElement('=Async Tab')).isDisplayed(),
@@ -132,9 +119,9 @@ const runTests = async (pageName, url, tabLocation) => {
 
             await goToUrlWithCustomTabConfig(url, conf);
 
-            await browser.setWindowSize(2500, await getBrowserHeight());
+            await browser.setWindowSize(2500, getBrowserHeight());
 
-            await waitForMainTabs();
+            await (await getElement('.mainTabs')).waitForDisplayed();
 
             assert.equal(
                 await (await getElement('=Patient Tab')).isDisplayed(),
@@ -171,9 +158,9 @@ const runTests = async (pageName, url, tabLocation) => {
 
             await goToUrlWithCustomTabConfig(url, conf);
 
-            await browser.setWindowSize(2000, Number(await getBrowserHeight()));
+            await browser.setWindowSize(2000, Number(getBrowserHeight()));
 
-            await waitForMainTabs();
+            await (await getElement('.mainTabs')).waitForDisplayed();
 
             assert.equal(
                 await (await getElement('=Hidden Tab')).isDisplayed(),
@@ -220,18 +207,8 @@ const runTests = async (pageName, url, tabLocation) => {
                 url.replace(/\?/, '/customTab1?'),
                 conf
             );
-            await waitForMainTabs();
 
-            // TODO: why are we assert
-            assert.equal(
-                await (
-                    await getElement('[data-test=LoadingIndicator]', {
-                        timeout: 5000,
-                    })
-                ).isDisplayed(),
-                true,
-                'tab loading indicator is showing'
-            );
+            await (await getElement('.mainTabs')).waitForDisplayed();
 
             // TODO: this is not a quality test
             // when we are directly routed to tab
@@ -239,13 +216,17 @@ const runTests = async (pageName, url, tabLocation) => {
             // even though hideAsync is still pending
 
             assert.equal(
-                await (
-                    await getElement('=Async Tab', {
-                        timeout: 5000,
-                    })
-                ).isDisplayed(),
+                await (await getElement('=Async Tab')).isDisplayed(),
                 true,
                 'We see pending custom tab button when routed to it'
+            );
+
+            assert.equal(
+                await (
+                    await getElement('[data-test=LoadingIndicator]')
+                ).isDisplayed(),
+                true,
+                'tab loading indicator is showing'
             );
 
             assert.equal(
@@ -274,9 +255,7 @@ const runTests = async (pageName, url, tabLocation) => {
 
             await goToUrlWithCustomTabConfig(url, conf);
 
-            await waitForMainTabs();
-
-            await browser.setWindowSize(2000, await getBrowserHeight());
+            await browser.setWindowSize(2000, getBrowserHeight());
 
             await browser.execute(() => {
                 window.renderCustomTab1 = div => {

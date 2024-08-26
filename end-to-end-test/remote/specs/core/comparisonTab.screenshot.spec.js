@@ -8,7 +8,6 @@ const {
     getElement,
     clickElement,
     waitForElementDisplayed,
-    waitForOncoprint,
 } = require('../../../shared/specUtils_Async');
 const { assertScreenShotMatch } = require('../../../shared/lib/testUtils');
 
@@ -20,15 +19,14 @@ describe('results view comparison tab screenshot tests', () => {
             await goToUrlAndSetLocalStorage(
                 `${CBIOPORTAL_URL}/results/comparison?Z_SCORE_THRESHOLD=2.0&cancer_study_id=coadread_tcga_pub&cancer_study_list=coadread_tcga_pub&case_set_id=coadread_tcga_pub_nonhypermut&comparison_selectedGroups=%5B"Altered%20group"%2C"Unaltered%20group"%2C"KRAS"%2C"NRAS"%5D&gene_list=KRAS%20NRAS%20BRAF&gene_set_choice=user-defined-list&genetic_profile_ids_PROFILE_COPY_NUMBER_ALTERATION=coadread_tcga_pub_gistic&genetic_profile_ids_PROFILE_MUTATION_EXTENDED=coadread_tcga_pub_mutations`
             );
-        });
-        it('results view comparison tab overlap tab upset plot view', async () => {
-            await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
             await (
                 await getElement('div[data-test="ComparisonPageOverlapTabDiv"]')
             ).waitForDisplayed({
                 timeout: 20000,
             });
-
+        });
+        it('results view comparison tab overlap tab upset plot view', async () => {
+            await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
             const res = await browser.checkElement(
                 'div[data-test="ComparisonPageOverlapTabDiv"]',
                 '',
@@ -409,19 +407,73 @@ describe('results view comparison tab screenshot tests', () => {
             assertScreenShotMatch(res);
         });
 
-        it('results view comparison tab microbiome signature tab two groups', async () => {
-            await clickElement('button[data-test="groupSelectorButtonBRAF"]', {
-                timeout: 20000,
-            });
+        it('results view comparison tab methylation enrichments tab two groups', async () => {
+            // deselect a group
+            await clickElement('button[data-test="groupSelectorButtonBRAF"]');
 
             await (
                 await getElement(
                     'div[data-test="GroupComparisonMethylationEnrichments"]'
                 )
-            ).waitForDisplayed({ timeout: 10000 });
-            await waitForElementDisplayed('b=RER1', { timeout: 10000 });
+            ).waitForDisplayed({ timeout: 20000 });
+            await (await getElement('b=RER1')).waitForDisplayed({
+                timeout: 10000,
+            });
             await clickElement('b=RER1');
-            await (await getElement('body')).moveTo();
+            await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
+            const res = await browser.checkElement(
+                '.msk-tab:not(.hiddenByPosition)',
+                '',
+                {
+                    hide: ['.qtip'],
+                }
+            );
+            assertScreenShotMatch(res);
+        });
+
+        it('results view comparison tab microbiome signature tab several groups', async () => {
+            await goToUrlAndSetLocalStorage(
+                `${CBIOPORTAL_URL}/results/comparison?Action=Submit&RPPA_SCORE_THRESHOLD=2.0&Z_SCORE_THRESHOLD=2.0&cancer_study_list=blca_tcga_pan_can_atlas_2018&case_set_id=blca_tcga_pan_can_atlas_2018_cnaseq&comparison_selectedGroups=%5B"CDKN2A"%2C"MDM2"%2C"MDM4"%5D&comparison_subtab=generic_assay_microbiome_signature&data_priority=0&gene_list=CDKN2A%2520MDM2%2520MDM4&geneset_list=%20&genetic_profile_ids_PROFILE_COPY_NUMBER_ALTERATION=blca_tcga_pan_can_atlas_2018_gistic&genetic_profile_ids_PROFILE_MUTATION_EXTENDED=blca_tcga_pan_can_atlas_2018_mutations&profileFilter=0&tab_index=tab_visualize`
+            );
+            await (
+                await getElement(
+                    'div[data-test="GroupComparisonGenericAssayEnrichments"]'
+                )
+            ).waitForDisplayed({ timeout: 10000 });
+            await (await getElement('b=Polyomavirus')).waitForDisplayed({
+                timeout: 10000,
+            });
+            await clickElement('b=Polyomavirus');
+            await (
+                await getElement('div[data-test="MiniBoxPlot"]')
+            ).waitForDisplayed({
+                timeout: 20000,
+            });
+            await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
+            const res = await browser.checkElement(
+                '.msk-tab:not(.hiddenByPosition)',
+                '',
+                {
+                    hide: ['.qtip'],
+                }
+            );
+            assertScreenShotMatch(res);
+        });
+
+        it('results view comparison tab microbiome signature tab two groups', async () => {
+            // deselect a group
+            await clickElement('button[data-test="groupSelectorButtonMDM4"]');
+
+            await (
+                await getElement(
+                    'div[data-test="GroupComparisonGenericAssayEnrichments"]'
+                )
+            ).waitForDisplayed({ timeout: 10000 });
+            await (await getElement('b=Wolbachia')).waitForDisplayed({
+                timeout: 10000,
+            });
+            await clickElement('b=Wolbachia');
+            await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
             const res = await browser.checkElement(
                 '.msk-tab:not(.hiddenByPosition)',
                 '',

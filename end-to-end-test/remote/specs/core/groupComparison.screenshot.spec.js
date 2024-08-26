@@ -114,7 +114,7 @@ describe('group comparison page screenshot tests', () => {
         });
 
         it('group comparison page clinical tab log scale  Kruskal Wallis test', async () => {
-            await clickElement(
+            clickElement(
                 'div[data-test="ComparisonPageClinicalTabDiv"] input[data-test="logScale"]'
             );
             await (
@@ -396,7 +396,7 @@ describe('group comparison page screenshot tests', () => {
             const body = await getElement('body');
             await body.waitForDisplayed();
             await body.moveTo({ xOffset: 0, yOffset: 0 });
-            const res = await browser.checkElement(
+            const res = browser.checkElement(
                 '.msk-tab:not(.hiddenByPosition)',
                 '',
                 {
@@ -432,20 +432,75 @@ describe('group comparison page screenshot tests', () => {
             await clickElement('.tabAnchor_dna_methylation');
             await (
                 await getElement(
-                    'div[data-test="GroupComparisonMethylationEnrichments"]',
-                    {
-                        timeout: 20000,
-                    }
+                    'div[data-test="GroupComparisonMethylationEnrichments"]'
+                )
+            ).waitForDisplayed({ timeout: 10000 });
+            await (await getElement('b=BET1')).waitForDisplayed({
+                timeout: 10000,
+            });
+            await clickElement('b=BET1');
+            await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
+            const res = await browser.checkElement(
+                '.msk-tab:not(.hiddenByPosition)',
+                '',
+                {
+                    hide: ['.qtip'],
+                }
+            );
+            assertScreenShotMatch(res);
+        });
+
+        it('group comparison page microbiome signature tab several groups', async () => {
+            // use study blca_tcga_pan_can_atlas_2018 for microbiome signature tests
+            await goToUrlAndSetLocalStorage(
+                `${CBIOPORTAL_URL}/comparison/generic_assay_microbiome_signature?sessionId=5d63f222e4b0d777deb05c78&unselectedGroups=%5B%22NA%22%5D`
+            );
+            await (
+                await getElement(
+                    'div[data-test="GroupComparisonGenericAssayEnrichments"]'
                 )
             ).waitForDisplayed({ timeout: 10000 });
             await (
-                await getElement('b=BET1', {
-                    timeout: 20000,
-                })
+                await getElement(
+                    'div[data-test="GroupComparisonGenericAssayEnrichments"]'
+                )
+            ).waitForDisplayed({ timeout: 10000 });
+            await (await getElement('b=Collimonas')).waitForDisplayed({
+                timeout: 10000,
+            });
+            await clickElement('b=Collimonas');
+            await (
+                await getElement('div[data-test="MiniBoxPlot"]')
             ).waitForDisplayed({
                 timeout: 20000,
             });
-            await clickElement('b=BET1');
+            const body = await getElement('body');
+            assert(await body.waitForDisplayed(), 'body not displayed');
+            await body.moveTo({ xOffset: 0, yOffset: 0 });
+            const res = await browser.checkElement(
+                '.msk-tab:not(.hiddenByPosition)',
+                '',
+                {
+                    hide: ['.qtip'],
+                }
+            );
+            assertScreenShotMatch(res);
+        });
+
+        it('group comparison page microbiome signature tab two groups', async () => {
+            // use study blca_tcga_pan_can_atlas_2018 for microbiome signature tests
+            await goToUrlAndSetLocalStorage(
+                `${CBIOPORTAL_URL}/comparison/generic_assay_microbiome_signature?sessionId=5d63f222e4b0d777deb05c78&unselectedGroups=%5B%22NA%22%2C%22White%22%5D`
+            );
+            await (
+                await getElement(
+                    'div[data-test="GroupComparisonGenericAssayEnrichments"]'
+                )
+            ).waitForDisplayed({ timeout: 10000 });
+            await (await getElement('b=Lawsonia')).waitForDisplayed({
+                timeout: 10000,
+            });
+            await clickElement('b=Lawsonia');
             await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
             const res = await browser.checkElement(
                 '.msk-tab:not(.hiddenByPosition)',
@@ -461,11 +516,7 @@ describe('group comparison page screenshot tests', () => {
             await goToUrlAndSetLocalStorage(
                 `${CBIOPORTAL_URL}/comparison/mutations?sessionId=5cf89323e4b0ab413787436c&selectedGene=AR`
             );
-            await (
-                await getElement('.borderedChart svg', {
-                    timeout: 20000,
-                })
-            ).waitForDisplayed({
+            await (await getElement('.borderedChart svg')).waitForDisplayed({
                 timeout: 20000,
             });
             const res = await browser.checkElement(
@@ -482,11 +533,7 @@ describe('group comparison page screenshot tests', () => {
             await goToUrlAndSetLocalStorage(
                 `${CBIOPORTAL_URL}/comparison/mutations?comparisonId=634006c24dd45f2bc4c3d4aa&unselectedGroups=%5B"Colon%20Adenocarcinoma"%5D`
             );
-            await (
-                await getElement('.borderedChart svg', {
-                    timeout: 20000,
-                })
-            ).waitForDisplayed({
+            await (await getElement('.borderedChart svg')).waitForDisplayed({
                 timeout: 20000,
             });
             await jsApiHover(await getElementByTestHandle('infoIcon'));
@@ -511,12 +558,7 @@ describe('group comparison page screenshot tests', () => {
                 `${CBIOPORTAL_URL}/comparison?sessionId=5ce411c7e4b0ab4137874076`
             );
             await (
-                await getElement(
-                    'div[data-test="ComparisonPageOverlapTabDiv"]',
-                    {
-                        timeout: 20000,
-                    }
-                )
+                await getElement('div[data-test="ComparisonPageOverlapTabDiv"]')
             ).waitForDisplayed({
                 timeout: 20000,
             });
@@ -827,6 +869,7 @@ describe('group comparison page screenshot tests', () => {
                 'disablePointerEvents',
                 0
             );
+            console.log('resolve::::::', res);
             assertScreenShotMatch(res);
         });
     });
