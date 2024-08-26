@@ -1,22 +1,30 @@
-const { getElement } = require('../../shared/specUtils_Async');
+const {
+    getElement,
+    getNestedElement,
+    clickElement,
+    isDisplayed,
+} = require('../../shared/specUtils_Async');
 
-const clickColumnSelectionButton = patientCnaTable => {
-    $(`[data-test=${patientCnaTable}]`)
-        .$('button*=Columns')
-        .click();
+const clickColumnSelectionButton = async patientCnaTable => {
+    await (
+        await getNestedElement([
+            `[data-test=${patientCnaTable}]`,
+            'button*=Columns',
+        ])
+    ).click();
 };
 
-const selectColumn = namespaceColumn1 => {
-    $(`[data-id="${namespaceColumn1}"]`).click();
+const selectColumn = async namespaceColumn1 => {
+    await clickElement(`[data-id="${namespaceColumn1}"]`);
 };
 
 const waitForTable = async table => {
     await (await getElement(`[data-test=${table}]`)).waitForDisplayed();
 };
 
-const namespaceColumnsAreDisplayed = columns => {
+const namespaceColumnsAreDisplayed = async columns => {
     for (const column of columns) {
-        if (!$(`//span[text()='${column}']`).isDisplayed()) {
+        if (!(await isDisplayed(`//span[text()='${column}']`))) {
             return false;
         }
     }
@@ -27,9 +35,17 @@ const namespaceColumnsAreNotDisplayed = columns => {
     return !namespaceColumnsAreDisplayed(columns);
 };
 
-const getRowByGene = (tableName, gene) => {
-    const tableRows = $$(`[data-test="${tableName}"] tr`);
-    return tableRows.find(r => r.$('td=' + gene).isExisting());
+const getRowByGene = async (tableName, gene) => {
+    const tableRows = await $$(`[data-test="${tableName}"] tr`);
+
+    for (const row of tableRows) {
+        const cell = await row.$(`td=${gene}`);
+        if (await cell.isExisting()) {
+            return row;
+        }
+    }
+
+    return null;
 };
 
 module.exports = {

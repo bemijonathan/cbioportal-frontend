@@ -1,20 +1,22 @@
-var assert = require('assert');
-var goToUrlAndSetLocalStorage = require('../../shared/specUtils')
-    .goToUrlAndSetLocalStorage;
-var assertScreenShotMatch = require('../../shared/lib/testUtils')
-    .assertScreenShotMatch;
-var waitForOncoprint = require('../../shared/specUtils').waitForOncoprint;
-var waitForPlotsTab = require('../../shared/specUtils').waitForPlotsTab;
-var selectReactSelectOption = require('../../shared/specUtils')
-    .selectReactSelectOption;
-var oncoprintTabUrl = require('./treatment.spec').oncoprintTabUrl;
-var plotsTabUrl = require('./treatment.spec').plotsTabUrl;
-var selectReactSelectOption = require('../../shared/specUtils')
-    .selectReactSelectOption;
-var goToTreatmentTab = require('./treatment.spec').goToTreatmentTab;
-var selectTreamentsBothAxes = require('./treatment.spec')
-    .selectTreamentsBothAxes;
-var selectElementByText = require('../../shared/specUtils').selectElementByText;
+const assert = require('assert');
+const { assertScreenShotMatch } = require('../../shared/lib/testUtils');
+const {
+    goToUrlAndSetLocalStorage,
+    waitForOncoprint,
+    waitForPlotsTab,
+    selectReactSelectOption,
+    selectElementByText,
+    clickElement,
+    setInputText,
+    getNestedElement,
+    getElement,
+} = require('../../shared/specUtils_Async');
+const {
+    oncoprintTabUrl,
+    plotsTabUrl,
+    goToTreatmentTab,
+    selectTreamentsBothAxes,
+} = require('./treatment.spec');
 
 const TREATMENT_EC50_PROFILE_NAME =
     'EC50 values of compounds on cellular phenotype readout';
@@ -25,41 +27,47 @@ const GENERIC_ASSAY_PROFILE_SELECTOR =
 
 describe('treatment feature', () => {
     describe('oncoprint tab', () => {
-        beforeEach(() => {
-            goToUrlAndSetLocalStorage(oncoprintTabUrl, true);
-            waitForOncoprint();
+        beforeEach(async () => {
+            await goToUrlAndSetLocalStorage(oncoprintTabUrl, true);
+            await waitForOncoprint();
         });
 
-        it('shows treatment profile heatmap track for treatment', () => {
-            goToTreatmentTab();
+        it('shows treatment profile heatmap track for treatment', async () => {
+            await goToTreatmentTab();
             // change profile to EC50
-            $(GENERIC_ASSAY_PROFILE_SELECTOR).click();
-            selectElementByText(TREATMENT_EC50_PROFILE_NAME).waitForExist();
-            selectElementByText(TREATMENT_EC50_PROFILE_NAME).click();
-            $(GENERIC_ASSAY_ENTITY_SELECTOR).click();
-            $('[data-test="GenericAssayEntitySelection"] input').setValue(
+            await clickElement(GENERIC_ASSAY_PROFILE_SELECTOR);
+            await selectElementByText(TREATMENT_EC50_PROFILE_NAME, {
+                waitForExist: true,
+            });
+            await (
+                await selectElementByText(TREATMENT_EC50_PROFILE_NAME)
+            ).click();
+            await clickElement(GENERIC_ASSAY_ENTITY_SELECTOR);
+            await setInputText(
+                '[data-test="GenericAssayEntitySelection"] input',
                 '17-AAG'
             );
-            var options = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="option"]'
-            );
-            options[0].click();
-            var indicators = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="indicatorContainer"]'
-            );
+            const options = await getNestedElement([
+                GENERIC_ASSAY_ENTITY_SELECTOR,
+                'div[class$="option"]',
+            ]);
+            await options[0].click();
+            const indicators = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="indicatorContainer"]');
             // close the dropdown
-            indicators[0].click();
-            var selectedOptions = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="multiValue"]'
-            );
+            await indicators[0].click();
+            const selectedOptions = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="multiValue"]');
+
             assert.equal(selectedOptions.length, 1);
 
-            $('button=Add Track').click();
+            await clickElement('button=Add Track');
             // close add tracks menu
-            var addTracksButton = $('button[id=addTracksDropdown]');
-            addTracksButton.click();
-            waitForOncoprint();
-            var res = browser.checkElement('[id=oncoprintDiv]');
+            await clickElement('button[id=addTracksDropdown]');
+            await waitForOncoprint();
+            const res = await browser.checkElement('[id=oncoprintDiv]');
             assertScreenShotMatch(res);
         });
     });
