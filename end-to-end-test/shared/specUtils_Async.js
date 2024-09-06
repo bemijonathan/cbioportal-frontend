@@ -43,12 +43,12 @@ async function waitForCoExpressionTab(timeout) {
     await getElement('#coexpressionTabGeneTabs', { timeout: timeout || 20000 });
 }
 
-function waitForPatientView(timeout) {
-    $('#patientViewPageTabs').waitForExist({ timeout: timeout || 20000 });
-    $('[data-test=patientview-copynumber-table]').waitForDisplayed({
+async function waitForPatientView(timeout) {
+    await getElement('#patientViewPageTabs', { timeout: timeout || 20000 });
+    await waitForElementDisplayed('[data-test=patientview-copynumber-table]', {
         timeout: timeout || 20000,
     });
-    $('[data-test=patientview-mutation-table]').waitForDisplayed({
+    await waitForElementDisplayed('[data-test=patientview-mutation-table]', {
         timeout: timeout || 20000,
     });
 }
@@ -655,13 +655,13 @@ async function getOncoprintGroupHeaderOptionsElements(trackGroupIndex) {
  * @param {any} data
  * @param {boolean} authenticated
  */
-function postDataToUrl(url, data, authenticated = true) {
-    const currentUrl = browser.getUrl();
+async function postDataToUrl(url, data, authenticated = true) {
+    const currentUrl = await browser.getUrl();
     const needToLogin =
         authenticated && (!currentUrl || !currentUrl.includes('http'));
 
     url = getUrl(url);
-    browser.execute(
+    await browser.execute(
         (/** @type {string} */ url, /** @type {any} */ data) => {
             function formSubmit(url, params) {
                 // method="smart" means submit with GET iff the URL wouldn't be too long
@@ -688,7 +688,7 @@ function postDataToUrl(url, data, authenticated = true) {
         url,
         data
     );
-    if (needToLogin) keycloakLogin(10000);
+    if (needToLogin) await keycloakLogin(10000);
 }
 
 async function keycloakLogin(timeout) {
@@ -777,7 +777,7 @@ async function openGroupComparison(studyViewUrl, chartDataTest, timeout) {
     await waitForGroupComparisonTabOpen(timeout);
 }
 
-function selectElementByText(text) {
+async function selectElementByText(text) {
     return $(`//*[text()="${text}"]`);
 }
 

@@ -31,7 +31,7 @@ const namespaceColumnsAreDisplayed = async columns => {
     return true;
 };
 
-const namespaceColumnsAreNotDisplayed = columns => {
+const namespaceColumnsAreNotDisplayed = async columns => {
     return !namespaceColumnsAreDisplayed(columns);
 };
 

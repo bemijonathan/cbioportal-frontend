@@ -62,25 +62,25 @@ const defaultColumnsAreDisplayed = async () => {
                 timeout: 10000,
             }
         )) &&
-        (await getElementByTestHandle(patientStructVarTable).$(
+        (await (await getElementByTestHandle(patientStructVarTable)).$(
             `span=${DEFAULT_COLS.GENE_2}`
         )) &&
-        (await getElementByTestHandle(patientStructVarTable).$(
+        (await (await getElementByTestHandle(patientStructVarTable)).$(
             `span=${DEFAULT_COLS.STATUS}`
         )) &&
-        (await getElementByTestHandle(patientStructVarTable).$(
+        (await (await getElementByTestHandle(patientStructVarTable)).$(
             `span=${DEFAULT_COLS.ANNOTATION}`
         )) &&
-        (await getElementByTestHandle(patientStructVarTable).$(
+        (await (await getElementByTestHandle(patientStructVarTable)).$(
             `span=${DEFAULT_COLS.VARIANT_CLASS}`
         )) &&
-        (await getElementByTestHandle(patientStructVarTable).$(
+        (await (await getElementByTestHandle(patientStructVarTable)).$(
             `span=${DEFAULT_COLS.EVENT_INFO}`
         )) &&
-        (await getElementByTestHandle(patientStructVarTable).$(
+        (await (await getElementByTestHandle(patientStructVarTable)).$(
             `span=${DEFAULT_COLS.CONNECTION_TYPE}`
         )) &&
-        (await getElementByTestHandle(patientStructVarTable).$(
+        (await (await getElementByTestHandle(patientStructVarTable)).$(
             `span='Breakpoint Type'`
         ))
     );

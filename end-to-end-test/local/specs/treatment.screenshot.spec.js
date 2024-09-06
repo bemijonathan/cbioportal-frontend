@@ -73,133 +73,173 @@ describe('treatment feature', () => {
     });
 
     describe('plots tab', () => {
-        beforeEach(() => {
-            goToUrlAndSetLocalStorage(plotsTabUrl, true);
-            waitForPlotsTab();
-            selectTreamentsBothAxes();
+        beforeEach(async () => {
+            await goToUrlAndSetLocalStorage(plotsTabUrl, true);
+            await waitForPlotsTab();
+            await selectTreamentsBothAxes();
         });
 
-        it('shows `value larger_than_8.00` in figure legend and indicates sub-threshold data points in plot', () => {
-            var res = browser.checkElement('[id=plots-tab-plot-svg]');
+        it('shows `value larger_than_8.00` in figure legend and indicates sub-threshold data points in plot', async () => {
+            const res = await browser.checkElement('[id=plots-tab-plot-svg]');
 
-            browser.execute(() => {
+            await browser.execute(() => {
                 $('div').css({ border: '1px solid red !important' });
             });
 
             assertScreenShotMatch(res);
         });
 
-        it('when option deselected, hides `value larger_than_8.00` in figure legend and sub-threshold data points in plot', () => {
-            $('[data-test=ViewLimitValues]').waitForExist({ timeout: 10000 });
-            $('[data-test=ViewLimitValues]').click();
-            var res = browser.checkElement('[id=plots-tab-plot-svg]');
+        it('when option deselected, hides `value larger_than_8.00` in figure legend and sub-threshold data points in plot', async () => {
+            await getElement('[data-test=ViewLimitValues]', { timeout: 10000 });
+            await clickElement('[data-test=ViewLimitValues]');
+            const res = await browser.checkElement('[id=plots-tab-plot-svg]');
             assertScreenShotMatch(res);
         });
 
-        it('shows waterfall plot when `Ordered samples` option is selected', () => {
-            var horzDataSelect = $('[name=h-profile-type-selector]').$('..');
-            selectReactSelectOption(horzDataSelect, 'Ordered samples');
+        it('shows waterfall plot when `Ordered samples` option is selected', async () => {
+            const horzDataSelect = await getNestedElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(horzDataSelect, 'Ordered samples');
 
             // make sure bars become visible (no mut data is available)
-            $('[data-test=ViewCopyNumber]').waitForExist({ timeout: 10000 });
-            $('[data-test=ViewCopyNumber]').click();
+            await getElement('[data-test=ViewCopyNumber]', { timeout: 10000 });
+            await clickElement('[data-test=ViewCopyNumber]');
 
-            var res = browser.checkElement('[id=plots-tab-plot-svg]');
+            const res = await browser.checkElement('[id=plots-tab-plot-svg]');
             assertScreenShotMatch(res);
         });
 
-        it('when option deselected, hides `value larger_than_8.00` in figure legend and sub-threshold data point indicators in waterfall plot', () => {
-            var horzDataSelect = $('[name=h-profile-type-selector]').$('..');
-            selectReactSelectOption(horzDataSelect, 'Ordered samples');
+        it('when option deselected, hides `value larger_than_8.00` in figure legend and sub-threshold data point indicators in waterfall plot', async () => {
+            const horzDataSelect = await getNestedElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(horzDataSelect, 'Ordered samples');
 
             // make sure bars become visible (no mut data is available)
-            $('[data-test=ViewCopyNumber]').waitForExist();
-            $('[data-test=ViewCopyNumber]').click();
+            await getElement('[data-test=ViewCopyNumber]', {
+                waitForExist: true,
+            });
+            await clickElement('[data-test=ViewCopyNumber]');
 
-            $('[data-test=ViewLimitValues]').click();
+            await clickElement('[data-test=ViewLimitValues]');
 
-            var res = browser.checkElement('[id=plots-tab-plot-svg]');
+            const res = await browser.checkElement('[id=plots-tab-plot-svg]');
             assertScreenShotMatch(res);
         });
 
-        it('rotates waterfall plot when swapping axes', () => {
-            var horzDataSelect = $('[name=h-profile-type-selector]').$('..');
-            selectReactSelectOption(horzDataSelect, 'Ordered samples');
+        it('rotates waterfall plot when swapping axes', async () => {
+            const horzDataSelect = await getNestedElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(horzDataSelect, 'Ordered samples');
 
             // make sure bars become visible (no mut data is available)
-            $('[data-test=ViewCopyNumber]').waitForExist();
-            $('[data-test=ViewCopyNumber]').click();
+            await getElement('[data-test=ViewCopyNumber]', {
+                waitForExist: true,
+            });
+            await clickElement('[data-test=ViewCopyNumber]');
 
-            $('[data-test=swapHorzVertButton]').click();
+            await clickElement('[data-test=swapHorzVertButton]');
 
-            var res = browser.checkElement('[id=plots-tab-plot-svg]');
+            const res = await browser.checkElement('[id=plots-tab-plot-svg]');
             assertScreenShotMatch(res);
         });
 
-        it('updates title of watefall plot when selecting a new gene', () => {
-            var horzDataSelect = $('[name=h-profile-type-selector]').$('..');
-            selectReactSelectOption(horzDataSelect, 'Ordered samples');
+        it('updates title of watefall plot when selecting a new gene', async () => {
+            const horzDataSelect = await getNestedElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(horzDataSelect, 'Ordered samples');
 
             // make sure bars become visible (no mut data is available)
-            $('[data-test=ViewCopyNumber]').waitForExist();
-            $('[data-test=ViewCopyNumber]').click();
+            await getElement('[data-test=ViewCopyNumber]', {
+                waitForExist: true,
+            });
+            await clickElement('[data-test=ViewCopyNumber]');
 
-            $('.gene-select').click();
+            await clickElement('.gene-select');
 
             // select gene menu entries
-            var geneMenuEntries = $('[data-test=GeneColoringMenu]')
-                .$('div=Genes')
-                .$('..')
-                .$$('div')[1]
-                .$$('div');
-            geneMenuEntries[3].click();
+            const geneMenuEntries = await (
+                await (
+                    await getNestedElement([
+                        '[data-test=GeneColoringMenu]',
+                        'div=Genes',
+                        '..',
+                    ])
+                ).$$('div')[1]
+            ).$$('div');
 
-            var res = browser.checkElement('[id=plots-tab-plot-svg]');
+            await geneMenuEntries[3].click();
+
+            const res = await browser.checkElement('[id=plots-tab-plot-svg]');
             assertScreenShotMatch(res);
         });
 
-        it('applies log-scale in waterfall plot', () => {
-            var horzDataSelect = $('[name=h-profile-type-selector]').$('..');
-            selectReactSelectOption(horzDataSelect, 'Ordered samples');
+        it('applies log-scale in waterfall plot', async () => {
+            const horzDataSelect = await getNestedElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(horzDataSelect, 'Ordered samples');
 
             // make sure bars become visible (no mut data is available)
-            $('[data-test=ViewCopyNumber]').waitForExist();
-            $('[data-test=ViewCopyNumber]').click();
+            await getElement('[data-test=ViewCopyNumber]', {
+                waitForExist: true,
+            });
+            await clickElement('[data-test=ViewCopyNumber]');
 
-            $('[data-test=VerticalLogCheckbox]').click();
+            await clickElement('[data-test=VerticalLogCheckbox]');
 
-            var res = browser.checkElement('[id=plots-tab-plot-svg]');
+            const res = await browser.checkElement('[id=plots-tab-plot-svg]');
             assertScreenShotMatch(res);
         });
 
-        it('reverses order of waterfall plot data when `Sort order` button pressed', () => {
-            var horzDataSelect = $('[name=h-profile-type-selector]').$('..');
-            selectReactSelectOption(horzDataSelect, 'Ordered samples');
+        it('reverses order of waterfall plot data when `Sort order` button pressed', async () => {
+            const horzDataSelect = await getNestedElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(horzDataSelect, 'Ordered samples');
 
             // make sure bars become visible (no mut data is available)
-            $('[data-test=ViewCopyNumber]').waitForExist();
-            $('[data-test=ViewCopyNumber]').click();
+            await getElement('[data-test=ViewCopyNumber]', {
+                waitForExist: true,
+            });
+            await clickElement('[data-test=ViewCopyNumber]');
 
-            $('[data-test=changeSortOrderButton]').click();
+            await clickElement('[data-test=changeSortOrderButton]');
 
-            var res = browser.checkElement('[id=plots-tab-plot-svg]');
+            const res = await browser.checkElement('[id=plots-tab-plot-svg]');
             assertScreenShotMatch(res);
         });
 
-        it('shows a search indicator when sample search term is entered', () => {
-            var horzDataSelect = $('[name=h-profile-type-selector]').$('..');
-            selectReactSelectOption(horzDataSelect, 'Ordered samples');
+        it('shows a search indicator when sample search term is entered', async () => {
+            const horzDataSelect = await getElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(horzDataSelect, 'Ordered samples');
 
             // make sure bars become visible (no mut data is available)
-            $('[data-test=ViewCopyNumber]').waitForExist();
-            $('[data-test=ViewCopyNumber]').click();
+            await getElement('[data-test=ViewCopyNumber]', {
+                waitForExist: true,
+            });
+            await clickElement('[data-test=ViewCopyNumber]');
 
-            var sampleSearch = $('label=Search Case(s)')
-                .$('..')
-                .$('input');
-            sampleSearch.setValue('TCGA-A2-A04U-01 TCGA-A1-A0SE-01');
+            const sampleSearch = await getNestedElement([
+                'label=Search Case(s)',
+                '..',
+                'input',
+            ]);
+            await sampleSearch.setValue('TCGA-A2-A04U-01 TCGA-A1-A0SE-01');
 
-            var res = browser.checkElement('[id=plots-tab-plot-svg]');
+            const res = await browser.checkElement('[id=plots-tab-plot-svg]');
             assertScreenShotMatch(res);
         });
     });

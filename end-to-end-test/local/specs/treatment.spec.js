@@ -8,6 +8,8 @@ const {
     selectElementByText,
     clickElement,
     getElement,
+    setInputText,
+    getNestedElement,
 } = require('../../shared/specUtils_Async');
 
 const CBIOPORTAL_URL = process.env.CBIOPORTAL_URL.replace(/\/$/, '');
@@ -40,97 +42,123 @@ describe('treatment feature', function() {
         it('shows treatment data type option in heatmap menu', async () => {
             await goToTreatmentTab();
             // open treatment profile selection menu
-            $(GENERIC_ASSAY_PROFILE_SELECTOR).click();
-            selectElementByText(TREATMENT_IC50_PROFILE_NAME).waitForExist();
-            assert($(`//*[text()="${TREATMENT_IC50_PROFILE_NAME}"]`));
-            selectElementByText(TREATMENT_EC50_PROFILE_NAME).waitForExist();
-            assert($(`//*[text()="${TREATMENT_EC50_PROFILE_NAME}"]`));
+            await clickElement(GENERIC_ASSAY_PROFILE_SELECTOR);
+            await (
+                await selectElementByText(TREATMENT_IC50_PROFILE_NAME)
+            ).waitForExist();
+            assert(
+                await getElement(`//*[text()="${TREATMENT_IC50_PROFILE_NAME}"]`)
+            );
+            await (
+                await selectElementByText(TREATMENT_EC50_PROFILE_NAME)
+            ).waitForExist();
+            assert(
+                await getElement(`//*[text()="${TREATMENT_EC50_PROFILE_NAME}"]`)
+            );
         });
 
         it('shows treatment selection box in heatmap menu when treatment data type is selected', async () => {
             await goToTreatmentTab();
             // change profile to IC50
-            $(GENERIC_ASSAY_PROFILE_SELECTOR).click();
-            selectElementByText(TREATMENT_IC50_PROFILE_NAME).waitForExist();
-            selectElementByText(TREATMENT_IC50_PROFILE_NAME).click();
-            assert($(`//*[text()="${TREATMENT_IC50_PROFILE_NAME}"]`));
+            await clickElement(GENERIC_ASSAY_PROFILE_SELECTOR);
+            await (
+                await selectElementByText(TREATMENT_IC50_PROFILE_NAME)
+            ).waitForExist();
+            await (
+                await selectElementByText(TREATMENT_IC50_PROFILE_NAME)
+            ).click();
+            assert(
+                await getElement(`//*[text()="${TREATMENT_IC50_PROFILE_NAME}"]`)
+            );
             // change profile to EC50
-            $(GENERIC_ASSAY_PROFILE_SELECTOR).click();
-            selectElementByText(TREATMENT_EC50_PROFILE_NAME).waitForExist();
-            selectElementByText(TREATMENT_EC50_PROFILE_NAME).click();
-            assert($(`//*[text()="${TREATMENT_EC50_PROFILE_NAME}"]`));
+            await clickElement(GENERIC_ASSAY_PROFILE_SELECTOR);
+            await (
+                await selectElementByText(TREATMENT_EC50_PROFILE_NAME)
+            ).waitForExist();
+            await (
+                await selectElementByText(TREATMENT_EC50_PROFILE_NAME)
+            ).click();
+            assert(
+                await getElement(`//*[text()="${TREATMENT_EC50_PROFILE_NAME}"]`)
+            );
         });
 
         it('shows all treatments in generic assay selector', async () => {
             await goToTreatmentTab();
             // open entity dropdown menu
-            $(GENERIC_ASSAY_ENTITY_SELECTOR).click();
-            const options = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="option"]'
-            );
+            await clickElement(GENERIC_ASSAY_ENTITY_SELECTOR);
+            const options = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="option"]');
             assert.equal(options.length, 10);
         });
 
         it('select one treatment in generic assay selector', async () => {
             await goToTreatmentTab();
-            $(GENERIC_ASSAY_ENTITY_SELECTOR).click();
-            $('[data-test="GenericAssayEntitySelection"] input').setValue(
+            clickElement(GENERIC_ASSAY_ENTITY_SELECTOR);
+            await setInputText(
+                '[data-test="GenericAssayEntitySelection"] input',
                 '17-AAG'
             );
-            const options = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="option"]'
-            );
-            options[1].click();
-            $(GENERIC_ASSAY_ENTITY_SELECTOR)
-                .$('div[class$="multiValue"]')
-                .waitForExist();
-            const selectedOptions = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="multiValue"]'
-            );
+            const options = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="option"]');
+            await options[1].click();
+            await (
+                await getNestedElement([
+                    GENERIC_ASSAY_ENTITY_SELECTOR,
+                    'div[class$="multiValue"]',
+                ])
+            ).waitForExist();
+            const selectedOptions = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="multiValue"]');
             assert.equal(selectedOptions.length, 1);
         });
 
         it('show multiple filtered treatments', async () => {
             await goToTreatmentTab();
-            $(GENERIC_ASSAY_ENTITY_SELECTOR).click();
-            $('[data-test="GenericAssayEntitySelection"] input').setValue(
+            await clickElement(GENERIC_ASSAY_ENTITY_SELECTOR);
+            setInputText(
+                '[data-test="GenericAssayEntitySelection"] input',
                 'AZD'
             );
-            const options = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="option"]'
-            );
+            const options = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="option"]');
             assert.equal(options.length, 3);
         });
 
         it('select multiple filtered treatments in generic assay selector', async () => {
             await goToTreatmentTab();
-            $(GENERIC_ASSAY_ENTITY_SELECTOR).click();
-            $('[data-test="GenericAssayEntitySelection"] input').setValue(
+            await clickElement(GENERIC_ASSAY_ENTITY_SELECTOR);
+            await setInputText(
+                '[data-test="GenericAssayEntitySelection"] input',
                 'AZD'
             );
-            const options = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="option"]'
-            );
-            options[0].click();
-            $('div[class$="multiValue"]').waitForExist();
-            const selectedOptions = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="multiValue"]'
-            );
+            const options = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="option"]');
+            await options[0].click();
+            await (await getElement('div[class$="multiValue"]')).waitForExist();
+            const selectedOptions = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="multiValue"]');
             assert.equal(selectedOptions.length, 2);
         });
 
         it('keeps the filtered treatments list open after selecting an option', async () => {
             await goToTreatmentTab();
-            $(GENERIC_ASSAY_ENTITY_SELECTOR).click();
-            const options = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="option"]'
-            );
+            await clickElement(GENERIC_ASSAY_ENTITY_SELECTOR);
+            const options = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="option"]');
             assert.equal(options.length, 10);
 
-            options[0].click();
-            options = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="option"]'
-            );
+            await options[0].click();
+            options = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="option"]');
             assert.equal(options.length, 9);
         });
 
@@ -143,15 +171,18 @@ describe('treatment feature', function() {
             );
             await waitForOncoprint();
             await goToTreatmentTab();
-            $(GENERIC_ASSAY_ENTITY_SELECTOR)
-                .$('div[class$="multiValue"]')
-                .waitForExist();
-            const selectedOptions = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="multiValue"]'
-            );
+            await (
+                await getNestedElement([
+                    GENERIC_ASSAY_ENTITY_SELECTOR,
+                    'div[class$="multiValue"]',
+                ])
+            ).waitForExist();
+            const selectedOptions = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="multiValue"]');
             assert.equal(selectedOptions.length, 1);
             assert.equal(
-                selectedOptions[0].getText(),
+                await selectedOptions[0].getText(),
                 'Name of 17-AAG (17-AAG): Desc of 17-AAG'
             );
         });
@@ -159,32 +190,35 @@ describe('treatment feature', function() {
         it('sets `generic_assay_groups` URL parameter', async () => {
             await goToTreatmentTab();
             // Select treatment profile
-            $(GENERIC_ASSAY_PROFILE_SELECTOR).click();
-            selectElementByText(TREATMENT_EC50_PROFILE_NAME).waitForExist();
-            selectElementByText(TREATMENT_EC50_PROFILE_NAME).click();
+            await clickElement(GENERIC_ASSAY_PROFILE_SELECTOR);
+            await (
+                await selectElementByText(TREATMENT_EC50_PROFILE_NAME)
+            ).waitForExist();
+            await selectElementByText(TREATMENT_EC50_PROFILE_NAME);
 
             // Select treatments
-            $(GENERIC_ASSAY_ENTITY_SELECTOR).click();
-            $('[data-test="GenericAssayEntitySelection"] input').setValue(
+            await clickElement(GENERIC_ASSAY_ENTITY_SELECTOR);
+            await setInputText(
+                '[data-test="GenericAssayEntitySelection"] input',
                 '17-AAG'
             );
-            const options = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="option"]'
-            );
-            options[0].click();
-            const indicators = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="indicatorContainer"]'
-            );
+            const options = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="option"]');
+            await options[0].click();
+            const indicators = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="indicatorContainer"]');
             // close the dropdown
-            indicators[0].click();
-            const selectedOptions = $(GENERIC_ASSAY_ENTITY_SELECTOR).$$(
-                'div[class$="multiValue"]'
-            );
+            await indicators[0].click();
+            const selectedOptions = await (
+                await getElement(GENERIC_ASSAY_ENTITY_SELECTOR)
+            ).$$('div[class$="multiValue"]');
             assert.equal(selectedOptions.length, 1);
 
-            $('button=Add Track').click();
+            await clickElement('button=Add Track');
             await waitForOncoprint();
-            const url = browser.getUrl();
+            const url = await browser.getUrl();
 
             const regex = /generic_assay_groups=study_es_0_treatment_ec50%2C17-AAG/;
             assert(url.match(regex));
@@ -194,34 +228,44 @@ describe('treatment feature', function() {
     describe('plots tab', () => {
         beforeEach(async () => {
             await goToUrlAndSetLocalStorage(plotsTabUrl, true);
-            waitForPlotsTab();
+            await waitForPlotsTab();
         });
 
         it('shows treatment option in horizontal data type selection box', async () => {
-            const select = $('[name=h-profile-type-selector]').$('..');
-            assert(reactSelectOption(select, 'Treatment Response'));
+            const select = await getNestedElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            assert(await reactSelectOption(select, 'Treatment Response'));
         });
 
         it('shows treatment option in vertical data type selection box', async () => {
-            const select = $('[name=v-profile-type-selector]').$('..');
-            assert(reactSelectOption(select, 'Treatment Response'));
+            const select = await getNestedElement([
+                '[name=v-profile-type-selector]',
+                '..',
+            ]);
+            assert(await reactSelectOption(select, 'Treatment Response'));
         });
 
         it('horizontal axis menu shows treatments in profile menu', async () => {
-            const horzDataSelect = $('[name=h-profile-type-selector]').$('..');
-            selectReactSelectOption(horzDataSelect, 'Treatment Response');
+            const horzDataSelect = getNestedElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(horzDataSelect, 'Treatment Response');
 
-            const horzProfileSelect = $('[name=h-profile-name-selector]').$(
-                '..'
-            );
+            const horzProfileSelect = await getNestedElement([
+                '[name=h-profile-name-selector]',
+                '..',
+            ]);
             assert(
-                reactSelectOption(
+                await reactSelectOption(
                     horzProfileSelect,
                     'EC50 values of compounds on cellular phenotype readout'
                 )
             );
             assert(
-                reactSelectOption(
+                await reactSelectOption(
                     horzProfileSelect,
                     'IC50 values of compounds on cellular phenotype readout'
                 )
@@ -229,20 +273,24 @@ describe('treatment feature', function() {
         });
 
         it('vertical axis menu shows treatments in profile menu', async () => {
-            const vertDataSelect = $('[name=v-profile-type-selector]').$('..');
-            selectReactSelectOption(vertDataSelect, 'Treatment Response');
+            const vertDataSelect = await getNestedElement([
+                '[name=v-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(vertDataSelect, 'Treatment Response');
 
-            const vertProfileSelect = $('[name=v-profile-name-selector]').$(
-                '..'
-            );
+            const vertProfileSelect = await getNestedElement([
+                '[name=v-profile-name-selector]',
+                '..',
+            ]);
             assert(
-                reactSelectOption(
+                await reactSelectOption(
                     vertProfileSelect,
                     'EC50 values of compounds on cellular phenotype readout'
                 )
             );
             assert(
-                reactSelectOption(
+                await reactSelectOption(
                     vertProfileSelect,
                     'IC50 values of compounds on cellular phenotype readout'
                 )
@@ -250,28 +298,34 @@ describe('treatment feature', function() {
         });
 
         it('horizontal axis menu shows treatment entry in entity menu', async () => {
-            const horzDataSelect = $('[name=h-profile-type-selector]').$('..');
-            selectReactSelectOption(horzDataSelect, 'Treatment Response');
+            const horzDataSelect = await getElement([
+                '[name=h-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(horzDataSelect, 'Treatment Response');
 
-            const horzProfileSelect = $('[name=h-profile-name-selector]').$(
-                '..'
-            );
-            selectReactSelectOption(
+            const horzProfileSelect = await getNestedElement([
+                '[name=h-profile-name-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(
                 horzProfileSelect,
                 'IC50 values of compounds on cellular phenotype readout'
             );
 
-            $('[data-test=generic-assay-info-icon]').waitForExist();
+            await getElement('[data-test=generic-assay-info-icon]', {
+                waitForExist: true,
+            });
 
             // NOT SUPER CLEAR WHY THESE ARE NECESSARY
-            browser.execute(function() {
+            await browser.execute(function() {
                 resultsViewPlotsTab.onHorizontalAxisGenericAssaySelect({
                     value: '17-AAG',
                     label: 'Name of 17-AAG',
                 });
             });
 
-            browser.execute(function() {
+            await browser.execute(function() {
                 resultsViewPlotsTab.onHorizontalAxisGenericAssaySelect({
                     value: 'AEW541',
                     label: 'Name of AEW541',
@@ -280,18 +334,24 @@ describe('treatment feature', function() {
         });
 
         it('vertical axis menu shows treatment entry in entity menu', async () => {
-            const vertDataSelect = $('[name=v-profile-type-selector]').$('..');
-            selectReactSelectOption(vertDataSelect, 'Treatment Response');
+            const vertDataSelect = await getElement([
+                '[name=v-profile-type-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(vertDataSelect, 'Treatment Response');
 
-            const vertProfileSelect = $('[name=v-profile-name-selector]').$(
-                '..'
-            );
-            selectReactSelectOption(
+            const vertProfileSelect = await getNestedElement([
+                '[name=v-profile-name-selector]',
+                '..',
+            ]);
+            await selectReactSelectOption(
                 vertProfileSelect,
                 'IC50 values of compounds on cellular phenotype readout'
             );
 
-            $('[data-test=generic-assay-info-icon]').waitForExist();
+            await getElement('[data-test=generic-assay-info-icon]', {
+                waitForExist: true,
+            });
 
             // browser.execute(function() {
             //     resultsViewPlotsTab.onVerticalAxisGenericAssaySelect({
