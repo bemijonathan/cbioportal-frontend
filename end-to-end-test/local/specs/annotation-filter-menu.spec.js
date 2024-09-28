@@ -2,7 +2,6 @@ const assert = require('assert');
 const {
     goToUrlAndSetLocalStorageWithProperty,
     goToUrlAndSetLocalStorage,
-    useExternalFrontend,
     waitForStudyView,
     waitForComparisonTab,
     openAlterationTypeSelectionMenu,
@@ -864,13 +863,20 @@ const waitForUpdateResultsView = async () => {
     await waitForElementDisplayed('[data-test=LazyMobXTable]');
 };
 
-const turnOffCancerGenesFilters = () => {
-    const activeFilterIcons = $$(
+const turnOffCancerGenesFilters = async () => {
+    // Select all filter icons
+    const filterIcons = await $$(
         '[data-test=gene-column-header] [data-test=header-filter-icon]'
-    ).filter(e => e.getCSSProperty('color').value === 'rgba(0,0,0,1)');
-    activeFilterIcons.forEach(i => i.click());
-};
+    );
 
+    // Filter and click active icons
+    for (const icon of filterIcons) {
+        const colorProperty = await icon.getCSSProperty('color');
+        if (colorProperty.value === 'rgba(0,0,0,1)') {
+            await icon.click();
+        }
+    }
+};
 const openAlterationFilterMenu = () => {
     $('[data-test=AlterationFilterButton]').waitForDisplayed();
     $('[data-test=AlterationFilterButton]').click();

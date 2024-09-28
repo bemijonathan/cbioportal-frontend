@@ -68,8 +68,10 @@ async function waitForOncoprint(timeout = 100000) {
     await browser.pause(500);
 }
 
-function waitForComparisonTab() {
-    $('[data-test=GroupComparisonAlterationEnrichments]').waitForDisplayed();
+async function waitForComparisonTab() {
+    await (
+        await $('[data-test=GroupComparisonAlterationEnrichments]')
+    ).waitForDisplayed();
 }
 
 async function getTextInOncoprintLegend() {
@@ -207,7 +209,7 @@ async function setDropdownOpen(
                     ? await $(dropdown_selector_or_elt)
                     : dropdown_selector_or_elt;
             // check if exists first because sometimes we get errors with isVisible if it doesn't exist
-            const isOpen = (await dropdown_elt.isExisting())
+            const isOpen = (await (await dropdown_elt).isExisting())
                 ? await dropdown_elt.isDisplayedInViewport()
                 : false;
             if (open === isOpen) {
@@ -788,8 +790,8 @@ async function jq(selector) {
 }
 
 const openAlterationTypeSelectionMenu = async () => {
-    await $(
-        '[data-test=AlterationEnrichmentTypeSelectorButton]'
+    (
+        await $('[data-test=AlterationEnrichmentTypeSelectorButton]')
     ).waitForExist();
     await clickElement('[data-test=AlterationEnrichmentTypeSelectorButton]');
     await (

@@ -681,7 +681,9 @@ describe('gsva feature', function() {
 });
 
 const checkTestStudy = async () => {
-    await (await getElement('span=Test study es_0')).waitForExist();
+    await getElement('span=Test study es_0', {
+        waitForExist: true,
+    });
 
     const checkbox = await getNestedElement([
         'span=Test study es_0',
@@ -690,7 +692,7 @@ const checkTestStudy = async () => {
     ]);
     await checkbox.click();
     await clickQueryByGeneButton();
-    waitForGeneQueryPage();
+    await waitForGeneQueryPage();
 };
 
 const checkGSVAprofile = async () => {

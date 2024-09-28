@@ -267,10 +267,15 @@ describe('study view editable breadcrumbs', () => {
         await waitForElementDisplayed('.userSelections');
 
         const element = await getNestedElement(['.userSelections', 'span=15']);
-        element.click();
-        element.keys(['ArrowRight', 'ArrowRight', 'Backspace', 'Backspace']);
-        element.setValue(13);
-        element.keys(['Enter']);
+        await element.click();
+        await element.keys([
+            'ArrowRight',
+            'ArrowRight',
+            'Backspace',
+            'Backspace',
+        ]);
+        await element.setValue(13);
+        await element.keys(['Enter']);
 
         // Wait for everything to settle
         await waitForNetworkQuiet();
@@ -315,9 +320,10 @@ describe('cancer gene filter', function() {
             true
         );
         assert.equal(
-            $(
-                `${MUTATIONS_GENES_TABLE} ${CANCER_GENE_FILTER_ICON}`
-            ).getCSSProperty('color').parsed.hex,
+            await getCSSProperty(
+                `${MUTATIONS_GENES_TABLE} ${CANCER_GENE_FILTER_ICON}`,
+                'color'
+            ).parsed.hex,
             '#bebebe'
         );
     });
@@ -365,10 +371,9 @@ describe('cancer gene filter', function() {
         );
 
         await clickElement('button=Reset charts');
-        await await getNestedElement([
-            '.modal-content',
-            'button=Confirm',
-        ]).waitForDisplayed();
+        await (
+            await getNestedElement(['.modal-content', 'button=Confirm'])
+        ).waitForDisplayed();
         await (
             await getNestedElement(['.modal-content', 'button=Confirm'])
         ).click();

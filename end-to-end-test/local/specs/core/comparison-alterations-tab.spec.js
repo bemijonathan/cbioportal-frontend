@@ -1,9 +1,6 @@
 const assert = require('assert');
 const {
     goToUrlAndSetLocalStorage,
-    selectReactSelectOption,
-    waitForNetworkQuiet,
-    useExternalFrontend,
     openAlterationTypeSelectionMenu,
     getNestedElement,
     clickElement,
