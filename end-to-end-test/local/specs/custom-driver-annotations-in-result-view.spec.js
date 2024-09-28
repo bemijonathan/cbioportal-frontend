@@ -23,7 +23,7 @@ const oncoprintTabUrlStructVar =
     '/results/oncoprint?Action=Submit&cancer_study_list=study_es_0&Z_SCORE_THRESHOLD=2.0&RPPA_SCORE_THRESHOLD=2.0&profileFilter=mutations%2Cstructural_variants%2Cgistic&case_set_id=study_es_0_cnaseq&gene_list=TMPRSS2&geneset_list=%20&tab_index=tab_visualize';
 
 describe('custom driver annotations feature in result view', () => {
-    describe.only('oncoprint tab - mutations', async () => {
+    describe('oncoprint tab - mutations', async () => {
         beforeEach(async () => {
             await goToUrlAndSetLocalStorage(oncoprintTabUrl, true);
             await waitForOncoprint();
